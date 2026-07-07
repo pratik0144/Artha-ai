@@ -1,0 +1,206 @@
+[
+  {
+    "account_id": "JD-1001",
+    "user_name": "Ramesh Kumar",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "otp_scam",
+      "account_threat"
+    ],
+    "keywords_hit": [
+      "otp",
+      "account band"
+    ],
+    "explanation": "Yeh OTP scam hai. Asli bank kabhi OTP nahi maangta.",
+    "action": "Turant phone band karo. Kisi ko OTP mat do.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:43:28.640944"
+  },
+  {
+    "account_id": "SB-2001",
+    "user_name": "Savitha Gowda",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "otp_scam",
+      "account_threat"
+    ],
+    "keywords_hit": [
+      "otp",
+      "account close"
+    ],
+    "explanation": "Idu OTP scam. Nijavaada bank OTP keḷuvadiilla.",
+    "action": "Takshaṇa phone muḷugi. Yarigū OTP koḍabēḍi.",
+    "lang": "kn",
+    "timestamp": "2026-05-09T03:43:32.848778"
+  },
+  {
+    "account_id": "SB-3001",
+    "user_name": "Arjun Singh",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "prize_scam"
+    ],
+    "keywords_hit": [
+      "lottery"
+    ],
+    "explanation": "Yeh lottery scam hai. Koi free prize nahi deta.",
+    "action": "Koi paisa mat bhejo. Phone band karo.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:43:36.852815"
+  },
+  {
+    "account_id": "SB-2001",
+    "user_name": "Savitha Gowda",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "kyc_scam"
+    ],
+    "keywords_hit": [
+      "kyc update"
+    ],
+    "explanation": "Bank phone mēle KYC maāḍuvudiilla. Idu fraud.",
+    "action": "Yaavude link tiḷḷabēḍi. Bank branch ge hōgi KYC maāḍi.",
+    "lang": "kn",
+    "timestamp": "2026-05-09T03:43:40.400994"
+  },
+  {
+    "account_id": "JD-1002",
+    "user_name": "Fatima Bi",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "otp_scam",
+      "fake_official"
+    ],
+    "keywords_hit": [
+      "otp",
+      "rbi"
+    ],
+    "explanation": "Yeh OTP scam hai. Asli bank kabhi OTP nahi maangta.",
+    "action": "Turant phone band karo. Kisi ko OTP mat do.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:43:43.819671"
+  },
+  {
+    "account_id": "SB-2002",
+    "user_name": "Meera Devi",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "remote_access"
+    ],
+    "keywords_hit": [
+      "anydesk"
+    ],
+    "explanation": "Koi app install mat karo — woh aapka paisa chura lenge.",
+    "action": "Phone band karo. Parivaar ko turant batao.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:43:47.823804"
+  },
+  {
+    "account_id": "JD-1001",
+    "user_name": "Ramesh Kumar",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "otp_scam",
+      "account_threat"
+    ],
+    "keywords_hit": [
+      "otp",
+      "account band"
+    ],
+    "explanation": "Yeh OTP scam hai. Asli bank kabhi OTP nahi maangta.",
+    "action": "Turant phone band karo. Kisi ko OTP mat do.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:45:01.335876"
+  },
+  {
+    "account_id": "SB-2001",
+    "user_name": "Savitha Gowda",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "otp_scam",
+      "account_threat"
+    ],
+    "keywords_hit": [
+      "otp",
+      "account close"
+    ],
+    "explanation": "Idu OTP scam. Nijavaada bank OTP keḷuvadiilla.",
+    "action": "Takshaṇa phone muḷugi. Yarigū OTP koḍabēḍi.",
+    "lang": "kn",
+    "timestamp": "2026-05-09T03:45:06.469993"
+  },
+  {
+    "account_id": "SB-3001",
+    "user_name": "Arjun Singh",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "prize_scam"
+    ],
+    "keywords_hit": [
+      "lottery"
+    ],
+    "explanation": "Yeh lottery scam hai. Koi free prize nahi deta.",
+    "action": "Koi paisa mat bhejo. Phone band karo.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:45:10.165811"
+  },
+  {
+    "account_id": "SB-2001",
+    "user_name": "Savitha Gowda",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "kyc_scam"
+    ],
+    "keywords_hit": [
+      "kyc update"
+    ],
+    "explanation": "Bank phone mēle KYC maāḍuvudiilla. Idu fraud.",
+    "action": "Yaavude link tiḷḷabēḍi. Bank branch ge hōgi KYC maāḍi.",
+    "lang": "kn",
+    "timestamp": "2026-05-09T03:45:13.733861"
+  },
+  {
+    "account_id": "JD-1002",
+    "user_name": "Fatima Bi",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "otp_scam",
+      "fake_official"
+    ],
+    "keywords_hit": [
+      "otp",
+      "rbi"
+    ],
+    "explanation": "Yeh OTP scam hai. Asli bank kabhi OTP nahi maangta.",
+    "action": "Turant phone band karo. Kisi ko OTP mat do.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:45:18.064091"
+  },
+  {
+    "account_id": "SB-2002",
+    "user_name": "Meera Devi",
+    "is_fraud": true,
+    "severity": "high",
+    "categories": [
+      "remote_access"
+    ],
+    "keywords_hit": [
+      "anydesk"
+    ],
+    "explanation": "Koi app install mat karo — woh aapka paisa chura lenge.",
+    "action": "Phone band karo. Parivaar ko turant batao.",
+    "lang": "hi",
+    "timestamp": "2026-05-09T03:45:22.181974"
+  }
+]

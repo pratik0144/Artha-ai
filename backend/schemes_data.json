@@ -1,0 +1,330 @@
+{
+  "cached_at": "2026-05-09T04:17:32.476028",
+  "schemes": [
+    {
+      "id": "pm-kisan",
+      "name": "PM Kisan Samman Nidhi",
+      "ministry": "Ministry of Agriculture",
+      "description": "Income support of ₹6000/year to farmer families",
+      "benefits": "₹6,000 per year (₹2,000 every 4 months)",
+      "eligibility": {
+        "occupation": [
+          "farmer"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": 18,
+        "age_max": null,
+        "bpl_required": false,
+        "land_required": true,
+        "state": "all"
+      },
+      "how_to_apply": "Visit pmkisan.gov.in or nearest CSC centre",
+      "documents_required": [
+        "Aadhaar",
+        "Land records",
+        "Bank account"
+      ],
+      "tags": [
+        "farmer",
+        "income",
+        "agriculture"
+      ],
+      "source_url": "https://pmkisan.gov.in",
+      "scraped_at": "2026-05-09T04:17:32.475534"
+    },
+    {
+      "id": "pmjdy",
+      "name": "Pradhan Mantri Jan Dhan Yojana",
+      "ministry": "Ministry of Finance",
+      "description": "Zero balance bank account with RuPay debit card",
+      "benefits": "Free bank account + ₹1 lakh accident insurance + overdraft ₹10,000",
+      "eligibility": {
+        "occupation": [
+          "any"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": 10,
+        "age_max": null,
+        "bpl_required": false,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Visit any bank branch with Aadhaar",
+      "documents_required": [
+        "Aadhaar or any ID proof"
+      ],
+      "tags": [
+        "banking",
+        "unbanked",
+        "financial inclusion"
+      ],
+      "source_url": "https://pmjdy.gov.in",
+      "scraped_at": "2026-05-09T04:17:32.475555"
+    },
+    {
+      "id": "pm-ujjwala",
+      "name": "PM Ujjwala Yojana",
+      "ministry": "Ministry of Petroleum",
+      "description": "Free LPG connection to women from BPL households",
+      "benefits": "Free LPG connection + first refill free",
+      "eligibility": {
+        "occupation": [
+          "any"
+        ],
+        "max_income": null,
+        "gender": "female",
+        "age_min": 18,
+        "age_max": null,
+        "bpl_required": true,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Apply at nearest LPG distributor",
+      "documents_required": [
+        "Aadhaar",
+        "BPL card",
+        "Address proof"
+      ],
+      "tags": [
+        "women",
+        "BPL",
+        "cooking gas"
+      ],
+      "source_url": "https://pmuy.gov.in",
+      "scraped_at": "2026-05-09T04:17:32.475559"
+    },
+    {
+      "id": "pm-fasal-bima",
+      "name": "PM Fasal Bima Yojana",
+      "ministry": "Ministry of Agriculture",
+      "description": "Crop insurance for farmers against natural calamities",
+      "benefits": "Insurance coverage for crop loss",
+      "eligibility": {
+        "occupation": [
+          "farmer"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": 18,
+        "age_max": null,
+        "bpl_required": false,
+        "land_required": true,
+        "state": "all"
+      },
+      "how_to_apply": "Apply through bank or CSC",
+      "documents_required": [
+        "Aadhaar",
+        "Land records",
+        "Bank account"
+      ],
+      "tags": [
+        "farmer",
+        "insurance",
+        "crop"
+      ],
+      "source_url": "https://pmfby.gov.in",
+      "scraped_at": "2026-05-09T04:17:32.475562"
+    },
+    {
+      "id": "atal-pension",
+      "name": "Atal Pension Yojana",
+      "ministry": "Ministry of Finance",
+      "description": "Pension scheme for unorganised sector workers",
+      "benefits": "₹1000 to ₹5000 monthly pension after age 60",
+      "eligibility": {
+        "occupation": [
+          "labour",
+          "farmer",
+          "any"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": 18,
+        "age_max": 40,
+        "bpl_required": false,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Apply at any bank branch",
+      "documents_required": [
+        "Aadhaar",
+        "Bank account",
+        "Mobile number"
+      ],
+      "tags": [
+        "pension",
+        "retirement",
+        "unorganised sector",
+        "savings"
+      ],
+      "source_url": "https://npscra.nsdl.co.in",
+      "scraped_at": "2026-05-09T04:17:32.475565"
+    },
+    {
+      "id": "ayushman-bharat",
+      "name": "Ayushman Bharat PM-JAY",
+      "ministry": "Ministry of Health",
+      "description": "Health insurance of ₹5 lakh per family per year",
+      "benefits": "₹5 lakh health cover per year",
+      "eligibility": {
+        "occupation": [
+          "any"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "bpl_required": true,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Check eligibility at mera.pmjay.gov.in",
+      "documents_required": [
+        "Aadhaar",
+        "Ration card"
+      ],
+      "tags": [
+        "health",
+        "insurance",
+        "BPL",
+        "hospital"
+      ],
+      "source_url": "https://pmjay.gov.in",
+      "scraped_at": "2026-05-09T04:17:32.475568"
+    },
+    {
+      "id": "pm-awas-gramin",
+      "name": "PM Awas Yojana Gramin",
+      "ministry": "Ministry of Rural Development",
+      "description": "Financial assistance to build pucca house for rural poor",
+      "benefits": "₹1.2 lakh (plain) or ₹1.3 lakh (hilly/difficult areas)",
+      "eligibility": {
+        "occupation": [
+          "any"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": 18,
+        "age_max": null,
+        "bpl_required": true,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Apply through Gram Panchayat",
+      "documents_required": [
+        "Aadhaar",
+        "BPL card",
+        "Land documents"
+      ],
+      "tags": [
+        "housing",
+        "rural",
+        "BPL",
+        "construction"
+      ],
+      "source_url": "https://pmayg.nic.in",
+      "scraped_at": "2026-05-09T04:17:32.475571"
+    },
+    {
+      "id": "pm-mudra",
+      "name": "PM Mudra Yojana",
+      "ministry": "Ministry of Finance",
+      "description": "Loans up to ₹10 lakh for small business owners",
+      "benefits": "Shishu: up to ₹50k | Kishore: ₹50k-5L | Tarun: ₹5L-10L",
+      "eligibility": {
+        "occupation": [
+          "entrepreneur",
+          "any"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": 18,
+        "age_max": null,
+        "bpl_required": false,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Apply at any bank or NBFC",
+      "documents_required": [
+        "Aadhaar",
+        "PAN",
+        "Business proof"
+      ],
+      "tags": [
+        "loan",
+        "business",
+        "entrepreneur",
+        "MSME"
+      ],
+      "source_url": "https://mudra.org.in",
+      "scraped_at": "2026-05-09T04:17:32.475574"
+    },
+    {
+      "id": "mgnrega",
+      "name": "MGNREGA",
+      "ministry": "Ministry of Rural Development",
+      "description": "Guarantees 100 days of wage employment per year to rural households",
+      "benefits": "100 days guaranteed work at minimum wages",
+      "eligibility": {
+        "occupation": [
+          "labour",
+          "any"
+        ],
+        "max_income": null,
+        "gender": "any",
+        "age_min": 18,
+        "age_max": null,
+        "bpl_required": false,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Register at Gram Panchayat for job card",
+      "documents_required": [
+        "Aadhaar",
+        "Job card from Gram Panchayat"
+      ],
+      "tags": [
+        "employment",
+        "rural",
+        "labour",
+        "wages"
+      ],
+      "source_url": "https://nrega.nic.in",
+      "scraped_at": "2026-05-09T04:17:32.475576"
+    },
+    {
+      "id": "sukanya-samriddhi",
+      "name": "Sukanya Samriddhi Yojana",
+      "ministry": "Ministry of Finance",
+      "description": "Savings scheme for girl child education and marriage",
+      "benefits": "High interest rate (8.2%) + tax benefits",
+      "eligibility": {
+        "occupation": [
+          "any"
+        ],
+        "max_income": null,
+        "gender": "female",
+        "age_min": 0,
+        "age_max": 10,
+        "bpl_required": false,
+        "land_required": false,
+        "state": "all"
+      },
+      "how_to_apply": "Open account at any post office or bank",
+      "documents_required": [
+        "Girl child birth certificate",
+        "Parent Aadhaar"
+      ],
+      "tags": [
+        "girl child",
+        "savings",
+        "education",
+        "women"
+      ],
+      "source_url": "https://www.nsiindia.gov.in",
+      "scraped_at": "2026-05-09T04:17:32.475579"
+    }
+  ]
+}

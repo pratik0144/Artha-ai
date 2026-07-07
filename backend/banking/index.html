@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artha AI - Mock Bank API Tester</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: rgba(30, 41, 59, 0.7);
+            --surface-hover: rgba(51, 65, 85, 0.8);
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --glass-blur: blur(12px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 400px),
+                              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 400px);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 24px;
+            text-align: center;
+            background: var(--surface-color);
+            backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 24px;
+            gap: 24px;
+        }
+
+        .sidebar {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .tab-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            transform: translateX(4px);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+
+        .main-content {
+            flex: 1;
+            background: var(--surface-color);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+            color: var(--text-main);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        input, select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        button.action-btn {
+            background: linear-gradient(135deg, var(--primary-color), #2563eb);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            margin-top: 8px;
+        }
+
+        button.action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(135deg, #4f46e5, var(--primary-hover));
+        }
+
+        button.action-btn:active {
+            transform: translateY(0);
+        }
+
+        .response-container {
+            margin-top: 32px;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .response-header {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .status-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .status-error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .status-waiting { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+        .response-body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .human-readable {
+            padding: 24px;
+            background: rgba(59, 130, 246, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        
+        .result-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .info-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .info-card .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        
+        .info-card .value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            color: #a5b4fc;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 300px;
+            margin: 0;
+            background: transparent;
+        }
+
+        .hint {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .hint strong { color: white; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Artha AI — Mock Bank API Tester</h1>
+        <div class="subtitle">Interactive Dashboard for the <code>http://localhost:5001</code> Backend</div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <button class="tab-btn active" onclick="switchTab('tab-lookup')">Account Lookup & Info</button>
+            <button class="tab-btn" onclick="switchTab('tab-transfer')">Transfer Funds</button>
+            <button class="tab-btn" onclick="switchTab('tab-bill')">Pay Bills</button>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            
+            <div class="hint">
+                <strong>Available Test Accounts:</strong><br>
+                JD-1001 (Ramesh), SB-2001 (Savitha), SB-2002 (Meera), SB-3001 (Arjun), JD-1002 (Fatima)
+            </div>
+
+            <!-- Tab: Account Lookup -->
+            <div id="tab-lookup" class="tab-content active">
+                <h2>Account Lookup & Balance</h2>
+                <div class="form-group">
+                    <label>Account ID</label>
+                    <input type="text" id="lookup-id" placeholder="e.g. JD-1001" value="JD-1001">
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 10px;">
+                    <button class="action-btn" onclick="callAPI('POST', '/account/lookup', {account_id: document.getElementById('lookup-id').value})">Full Profile</button>
+                    <button class="action-btn" style="background: rgba(255,255,255,0.1); color: white; box-shadow: none;" onclick="callAPI('GET', '/account/' + document.getElementById('lookup-id').value + '/balance')">Get Balance</button>
+                </div>
+            </div>
+
+            <!-- Tab: Transfer -->
+            <div id="tab-transfer" class="tab-content">
+                <h2>Transfer Funds</h2>
+                <div class="form-group">
+                    <label>From Account ID</label>
+                    <input type="text" id="transfer-from" placeholder="e.g. JD-1001" value="JD-1001">
+                </div>
+                <div class="form-group">
+                    <label>To Account ID</label>
+                    <input type="text" id="transfer-to" placeholder="e.g. SB-2001" value="SB-2001">
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="transfer-amount" placeholder="e.g. 500" value="500">
+                </div>
+                <button class="action-btn" onclick="doTransfer()">Execute Transfer</button>
+            </div>
+
+            <!-- Tab: Bill Payment -->
+            <div id="tab-bill" class="tab-content">
+                <h2>Pay Utility Bills</h2>
+                <div class="form-group">
+                    <label>Account ID</label>
+                    <input type="text" id="bill-id" placeholder="e.g. SB-2002" value="SB-2002">
+                </div>
+                <div class="form-group">
+                    <label>Bill Type</label>
+                    <select id="bill-type">
+                        <option value="electricity">Electricity</option>
+                        <option value="mobile_recharge">Mobile Recharge</option>
+                        <option value="ration">Ration</option>
+                        <option value="insurance_premium">Insurance Premium</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="bill-amount" placeholder="e.g. 350" value="350">
+                </div>
+                <button class="action-btn" onclick="doBillPay()">Pay Bill</button>
+            </div>
+
+            <!-- API Response Viewer -->
+            <div class="response-container">
+                <div class="response-header">
+                    <span id="req-url">No request made yet</span>
+                    <span id="req-status" class="status-badge status-waiting">WAITING</span>
+                </div>
+                <div class="response-body">
+                    <div id="human-readable" class="human-readable" style="display: none;"></div>
+                    <pre id="response-output">Results will appear here...</pre>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5001";
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            
+            resetResponse();
+        }
+
+        function resetResponse() {
+            document.getElementById('req-url').textContent = "Ready";
+            document.getElementById('req-status').className = "status-badge status-waiting";
+            document.getElementById('req-status').textContent = "WAITING";
+            document.getElementById('response-output').textContent = "Results will appear here...";
+            document.getElementById('human-readable').style.display = "none";
+            document.getElementById('human-readable').innerHTML = "";
+        }
+
+        function formatCurrency(num) {
+            return "₹" + Number(num).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function extractHumanReadableData(endpoint, data) {
+            let html = "";
+            
+            if (data.status === "error") {
+                html = `<div style="color: #ef4444; font-weight: 500;">❌ Error: ${data.error}</div>`;
+                return html;
+            }
+
+            if (endpoint.includes("/account/lookup")) {
+                const acct = data.data;
+                html = `
+                    <div style="color: #34d399; font-weight: 500; margin-bottom: 12px;">✅ Account Profile Found</div>
+                    <div class="result-cards">
+                        <div class="info-card"><div class="label">Name</div><div class="value">${acct.name}</div></div>
+                        <div class="info-card"><div class="label">Balance</div><div class="value" style="color: #60a5fa">${formatCurrency(acct.balance)}</div></div>
+                        <div class="info-card"><div class="label">Account Type</div><div class="value">${acct.account_type}</div></div>
+                    </div>
+                `;
+            } else if (endpoint.includes("/balance")) {
+                html = `
+                    <div style="color: #34d399; font-weight: 500; margin-bottom: 12px;">✅ Balance Retrieved</div>
+                    <div class="result-cards">
+                        <div class="info-card"><div class="label">Account</div><div class="value">${data.name} (${data.account_id})</div></div>
+                        <div class="info-card"><div class="label">Available Balance</div><div class="value" style="color: #60a5fa; font-size: 1.5rem;">${formatCurrency(data.balance_raw)}</div></div>
+                    </div>
+                `;
+            } else if (endpoint.includes("/transfer")) {
+                html = `
+                    <div style="color: #34d399; font-weight: 500; margin-bottom: 12px;">✅ Transfer Successful</div>
+                    <div class="result-cards">
+                        <div class="info-card"><div class="label">Status Message</div><div class="value" style="font-size: 1rem; line-height: 1.4;">${data.data.message}</div></div>
+                        <div class="info-card"><div class="label">Sender New Balance</div><div class="value" style="color: #f87171">${data.data.sender_new_balance}</div></div>
+                        <div class="info-card"><div class="label">Receiver New Balance</div><div class="value" style="color: #34d399">${data.data.receiver_new_balance}</div></div>
+                    </div>
+                `;
+            } else if (endpoint.includes("/bill/pay")) {
+                const rec = data.data.receipt;
+                html = `
+                    <div style="color: #34d399; font-weight: 500; margin-bottom: 12px;">✅ Bill Payment Successful</div>
+                    <div class="result-cards">
+                        <div class="info-card"><div class="label">Receipt ID</div><div class="value">${rec.receipt_id}</div></div>
+                        <div class="info-card"><div class="label">Amount Deducted</div><div class="value" style="color: #f87171">${rec.amount_paid}</div></div>
+                        <div class="info-card"><div class="label">Remaining Balance</div><div class="value" style="color: #60a5fa">${rec.remaining_balance}</div></div>
+                    </div>
+                `;
+            } else {
+                html = `<div style="color: #34d399; font-weight: 500;">✅ Success! Scroll down to see JSON.</div>`;
+            }
+            return html;
+        }
+
+        async function callAPI(method, endpoint, body = null) {
+            const url = `${API_BASE}${endpoint}`;
+            const outEl = document.getElementById('response-output');
+            const statusEl = document.getElementById('req-status');
+            const urlEl = document.getElementById('req-url');
+            const hrEl = document.getElementById('human-readable');
+
+            urlEl.textContent = `${method} ${endpoint}`;
+            statusEl.className = "status-badge status-waiting";
+            statusEl.textContent = "FETCHING...";
+            outEl.textContent = "Loading...";
+            hrEl.style.display = "none";
+
+            try {
+                const options = {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const res = await fetch(url, options);
+                const data = await res.json();
+                
+                if (res.ok) {
+                    statusEl.className = "status-badge status-success";
+                    statusEl.textContent = "SUCCESS (200)";
+                } else {
+                    statusEl.className = "status-badge status-error";
+                    statusEl.textContent = `ERROR (${res.status})`;
+                }
+
+                // Show human readable cards
+                hrEl.innerHTML = extractHumanReadableData(endpoint, data);
+                hrEl.style.display = "block";
+
+                // Show JSON
+                outEl.textContent = JSON.stringify(data, null, 4);
+
+            } catch (err) {
+                statusEl.className = "status-badge status-error";
+                statusEl.textContent = "NETWORK ERROR";
+                hrEl.style.display = "none";
+                outEl.textContent = "Failed to connect to API.\n\nError: " + err.message;
+            }
+        }
+
+        function doTransfer() {
+            const from = document.getElementById('transfer-from').value;
+            const to = document.getElementById('transfer-to').value;
+            const amt = parseFloat(document.getElementById('transfer-amount').value);
+            callAPI('POST', '/transfer', {from_id: from, to_id: to, amount: amt});
+        }
+
+        function doBillPay() {
+            const id = document.getElementById('bill-id').value;
+            const type = document.getElementById('bill-type').value;
+            const amt = parseFloat(document.getElementById('bill-amount').value);
+            callAPI('POST', '/bill/pay', {account_id: id, bill_type: type, amount: amt});
+        }
+
+    </script>
+</body>
+</html>
