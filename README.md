@@ -104,12 +104,15 @@ DigiSeva/
 - **Per-Session Rate Limiting:** 15 requests/minute + 200 requests/day per user session, enforced via Supabase with real-time credit display on the frontend.
 - **Agentic Orchestration & Specialist Swarm:**
   - **Orchestrator Pipeline:** Language detect → fraud screen → intent classify → agent dispatch.
-  - **Banking Agent:** Handles balances, transactions, and bills — queries Supabase directly.
+  - **Banking Agent:** Handles balances, transactions, and bills — queries Supabase directly. Handles Fixed Deposit creation verbs (make, start, setup) correctly.
   - **Schemes Agent:** Recommends government schemes using rule-based scoring engine + 50+ scheme database.
   - **FraudGuard Agent:** Zero-latency scam interception with pattern matching and event logging.
   - **Literacy Agent:** Explains financial concepts using simple rural analogies.
-  - **Loans Agent (New):** Loan Specialist Agent that calculates monthly EMIs and interest rates offline.
-  - **Budgeting Agent (New):** Analyst Agent that evaluates monthly income, spending, and limits to provide context-aware savings advice.
+  - **Loans Agent (New):** Loan Specialist Agent that calculates monthly EMIs and interest rates offline, and pulls active loan details/statements.
+  - **Budgeting Agent (New):** Analyst Agent that evaluates monthly income, spending, and limits to provide context-aware savings advice and categories.
+  - **Profile Management (New):** Mapped offline registry tasks to execute CRUD operations (view, update specific fields, clear/delete profile) on the `sessions` JSONB database record.
+  - **Offline Statements & Reminders (New):** Queries upcoming/overdue installments and active loans directly from Supabase tables to prevent LLM quota failures.
+- **Voice UI Language Lock (New):** Built a segmented language selection controller (Hindi, Kannada, English) forcing input audio transcription, serverless API query processing, and output TTS voice playback to align with the chosen language.
 - **Robust Intent Classification & NLP Integration:** Integrated **`compromise`** to parse spelled-out numbers/names and **`natural`** for Levenshtein-distance spelling correction. Bypasses Gemini entirely for 150+ common intents via the local registry.
 
 ---

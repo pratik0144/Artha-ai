@@ -2,6 +2,23 @@
 
 All notable changes to the Artha AI project will be documented in this file.
 
+## [2.2.0] - 2026-07-08 — Profile CRUD, Offline Statements & Voice Language Switcher
+
+### Added
+- **User Profile CRUD Management:**
+  - Added view, update, and delete actions directly in chat via `agent-registry.js` to manage the session's JSONB `profile` record in the database.
+  - Supports field updates like occupation, location, name, and language.
+- **Offline Statements & Reminders:**
+  - `agent_check_loans` fetches active loan parameters from the database, formatting output values using Lakh/Crore systems.
+  - `agent_check_installments` retrieves upcoming and overdue payment reminders (LPG, PM-KISAN, crop insurance, bills) directly from Supabase, bypassing Gemini quota failures.
+- **Voice UI Language Lock Segmented Switcher:**
+  - Added a premium segmented language picker (Hindi, Kannada, English) to the voice assistant UI.
+  - Forces audio transcription hints, serverless API query processing language overrides, and TTS voice playback outputs to strictly match the selected option.
+
+### Fixed
+- **Fixed Deposit Verb Mapping:**
+  - Expanded fixed deposit creation intent matching for verbs like `'make'` and `'setup'` (e.g. `"make an fd of 50000 rupees"`) inside `banking.js` and `agent-registry.js`.
+
 ## [2.1.0] - 2026-07-07 — Offline Agentic & Speech-to-Text Optimization
 
 ### Added
