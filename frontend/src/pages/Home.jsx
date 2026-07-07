@@ -6,13 +6,15 @@ import { useSession } from '../context/SessionContext';
 import {
   Mic, ArrowRight, ShieldAlert, Sparkles, Send, Globe,
   Bell, Landmark, TrendingUp, CalendarClock, AlertTriangle,
-  CheckCircle2, PiggyBank, Wallet
+  CheckCircle2, PiggyBank, Wallet, Volume2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 export const Home = () => {
   const { profile, latestFraudAlert, dismissFraudAlert, history, sendMessage, isLoading, t, appLang, changeLanguage } = useSession();
   const navigate = useNavigate();
+  const { speak, stop, isSpeaking } = useSpeechSynthesis();
   const [textInput, setTextInput] = useState('');
 
   // --- Live data states ---
@@ -27,34 +29,33 @@ export const Home = () => {
   useEffect(() => {
     if (!profile?.account_id) return;
     const id = profile.account_id;
-    const BANK = 'http://localhost:5001';
 
     // Installments
-    fetch(`${BANK}/account/${id}/installments`)
+    fetch(`/api/installments?account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setInstallments(d.installments); })
       .catch(() => { });
 
     // Loans
-    fetch(`${BANK}/account/${id}/loans`)
+    fetch(`/api/loans?account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setLoans(d.loans); })
       .catch(() => { });
 
     // Spending
-    fetch(`${BANK}/account/${id}/spending`)
+    fetch(`/api/spending?account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setSpending(d); })
       .catch(() => { });
 
     // Fixed Deposits
-    fetch(`${BANK}/account/${id}/fixed_deposits`)
+    fetch(`/api/fixed_deposits?account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setFixedDeposits(d.fixed_deposits || []); })
       .catch(() => { });
 
     // Eligible schemes (not-yet-enrolled)
-    fetch(`${BANK}/account/${id}/eligible_schemes`)
+    fetch(`/api/eligible_schemes?account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setEligibleSchemes(d.eligible_schemes || []); })
       .catch(() => { });
@@ -72,15 +73,15 @@ export const Home = () => {
     const val = parseFloat(budgetInput);
     if (isNaN(val) || val <= 0) return;
     try {
-      const res = await fetch(`http://localhost:5001/account/${profile.account_id}/spending/limit`, {
+      const res = await fetch(`/api/spending/limit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ limit: val }),
+        body: JSON.stringify({ account_id: profile.account_id, limit: val }),
       });
       const data = await res.json();
       if (data.status === 'success') {
         // Refresh spending data
-        const refreshRes = await fetch(`http://localhost:5001/account/${profile.account_id}/spending`);
+        const refreshRes = await fetch(`/api/spending?account_id=${profile.account_id}`);
         const refreshData = await refreshRes.json();
         if (refreshData.status === 'success') setSpending(refreshData);
         setBudgetInput('');
@@ -199,10 +200,22 @@ export const Home = () => {
               <div className={`max-w-[80%] p-3 rounded-xl ${msg.role === 'user' ? 'bg-primary text-on-primary rounded-tr-sm' : (msg.fraud_triggered ? 'bg-error-container text-on-error-container rounded-tl-sm border border-error' : 'bg-surface-container text-on-surface rounded-tl-sm')}`}>
                 <p className="body-sm">{msg.content}</p>
                 {msg.role === 'assistant' && msg.agent && (
-                  <p className="text-[10px] mt-2 opacity-70 uppercase tracking-wider font-bold">
-                    {msg.fraud_triggered ? <ShieldAlert size={10} className="inline mr-1" /> : <Sparkles size={10} className="inline mr-1" />}
-                    {msg.agent.replace('_', ' ')}
-                  </p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <p className="text-[10px] opacity-70 uppercase tracking-wider font-bold">
+                      {msg.fraud_triggered ? <ShieldAlert size={10} className="inline mr-1" /> : <Sparkles size={10} className="inline mr-1" />}
+                      {msg.agent.replace('_', ' ')}
+                    </p>
+                    <button
+                      onClick={() => {
+                        if (isSpeaking) { stop(); return; }
+                        speak(msg.content, appLang || 'en', { rate: appLang === 'en' ? 1.0 : 0.9 });
+                      }}
+                      className="ml-2 p-1 rounded-full hover:bg-surface-variant/40 transition-colors"
+                      title="Listen to this message"
+                    >
+                      <Volume2 size={12} className={isSpeaking ? 'animate-pulse text-primary' : 'opacity-60'} />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

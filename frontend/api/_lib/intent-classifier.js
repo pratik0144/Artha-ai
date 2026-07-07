@@ -15,21 +15,42 @@ const INTENT_KEYWORDS = {
     // English
     'balance', 'account', 'bank', 'statement', 'passbook', 'withdraw',
     'deposit', 'transfer', 'savings', 'current account', 'fixed deposit', 'fd', 'invest',
-    'installment', 'emi', 'reminder', 'loan', 'outstanding', 'spending',
-    'budget', 'kharcha', 'spent',
+    'installment', 'installments', 'emi', 'emis', 'reminder', 'reminders', 'due', 'overdue',
     // Hindi (romanized)
     'khata', 'bachat', 'jama', 'nikalna', 'paisa',
-    'baaki', 'rashi', 'kist', 'kisto', 'karz', 'udhar', 'rin', 'nivesh',
+    'baaki', 'rashi', 'nivesh', 'kist', 'kisto',
     // Hindi (Devanagari)
     'बैलेंस', 'खाता', 'बैंक', 'बचत', 'जमा', 'निकालना', 'पैसा',
-    'बाकी', 'राशि', 'शेष', 'किस्त', 'ईएमआई', 'कर्ज', 'लोन',
-    'खर्चा', 'बजट', 'फिक्स्ड डिपॉजिट', 'एफडी', 'निवेश',
+    'बाकी', 'राशि', 'शेष', 'फिक्स्ड डिपॉजिट', 'एफडी', 'निवेश', 'किस्त', 'ईएमआई', 'बकाया',
     // Kannada (romanized)
     'ulitaaya',
     // Kannada (script)
     'ಬ್ಯಾಲೆನ್ಸ್', 'ಖಾತೆ', 'ಬ್ಯಾಂಕ್', 'ಉಳಿತಾಯ', 'ಹಣ',
-    'ಕಂತು', 'ಇಎಂಐ', 'ಸಾಲ', 'ಲೋನ್', 'ಖರ್ಚು', 'ಬಜೆಟ್',
-    'ಫಿಕ್ಸೆಡ್ ಡೆಪಾಸಿಟ್', 'ಎಫ್\u200cಡಿ', 'ಹೂಡಿಕೆ',
+    'ಫಿಕ್ಸೆಡ್ ಡೆಪಾಸಿಟ್', 'ಎಫ್\u200cಡಿ', 'ಹೂಡಿಕೆ', 'ಕಂತು', 'ಇಎಂಐ', 'ಬಾಕಿ',
+  ],
+  loans: [
+    // English
+    'loan', 'loans', 'interest rate', 'kcc', 'tractor loan', 'mudra loan',
+    // Hindi (romanized)
+    'karz', 'udhar', 'rin', 'byaaj',
+    // Hindi (Devanagari)
+    'कर्ज', 'लोन', 'ब्याज',
+    // Kannada (romanized)
+    'sala', 'baddi',
+    // Kannada (script)
+    'ಸಾಲ', 'ಬಡ್ಡಿ ದರ',
+  ],
+  budgeting: [
+    // English
+    'budget', 'spending', 'spent', 'spend', 'breakdown', 'analysis', 'expenses', 'where did i', 'spent this month', 'spending limit', 'limit', 'monthly limit',
+    // Hindi (romanized)
+    'budget', 'kharcha', 'kharch', 'hisaab', 'hisab',
+    // Hindi (Devanagari)
+    'बजट', 'खर्चा', 'खर्च', 'हिसाब',
+    // Kannada (romanized)
+    'kharchu',
+    // Kannada (script)
+    'ಬಜೆಟ್', 'ಖರ್ಚು', 'ಲೆಕ್ಕ',
   ],
   schemes: [
     // English
@@ -52,12 +73,12 @@ const INTENT_KEYWORDS = {
   payments: [
     // English
     'pay', 'send money', 'UPI', 'recharge', 'bill', 'electricity',
-    'mobile recharge', 'DTH', 'EMI', 'loan',
+    'mobile recharge', 'DTH',
     // Hindi (romanized)
     'bhejo', 'bhejdo', 'payment', 'bijli',
     'karo',
     // Hindi (Devanagari)
-    'भेजो', 'भुगतान', 'रिचार्ज', 'बिजली', 'बिल', 'किस्त',
+    'भेजो', 'भुगतान', 'रिचार्ज', 'बिजली', 'बिल',
     // Kannada (romanized)
     'kalisi',
     // Kannada (script)
@@ -80,13 +101,17 @@ const INTENT_KEYWORDS = {
   literacy: [
     // English
     'what is', 'how to', 'explain', 'teach', 'learn', 'meaning',
-    'help me understand', 'what does',
+    'help me understand', 'what does', 'upi', 'gpay', 'phonepe',
+    'paytm', 'online payment', 'saving', 'checking', 'open bank account',
     // Hindi (romanized)
     'kya hai', 'kaise', 'samjhao', 'batao', 'sikhao', 'matlab',
+    'khata khol',
     // Hindi (Devanagari)
     'क्या है', 'कैसे', 'समझाओ', 'बताओ', 'सिखाओ', 'मतलब',
+    'खाता खोल',
     // Kannada (romanized)
     'enu', 'hege', 'helkodi', 'artham',
+    'ಖಾತೆ ತೆರೆಯುವುದು',
     // Kannada (script)
     'ಏನು', 'ಹೇಗೆ', 'ಹೇಳ್ಕೊಡಿ', 'ಅರ್ಥ',
   ],
@@ -108,7 +133,7 @@ const INTENT_KEYWORDS = {
 const VALID_INTENTS = Object.keys(INTENT_KEYWORDS);
 
 // Tie-breaking priority order (fraud highest, greeting lowest)
-const PRIORITY_ORDER = ['fraud', 'banking', 'schemes', 'payments', 'literacy', 'greeting'];
+const PRIORITY_ORDER = ['fraud', 'loans', 'budgeting', 'banking', 'schemes', 'payments', 'literacy', 'greeting'];
 
 // ── Keyword-Based Classification ───────────────────────────────
 
@@ -167,11 +192,13 @@ async function classifyByLLM(supabase, text) {
   const systemPrompt =
     'You are an intent classifier for an Indian rural financial assistant.\n' +
     'Classify the user message into EXACTLY ONE of these categories:\n' +
-    '  banking, schemes, payments, fraud, literacy, greeting\n\n' +
+    '  banking, schemes, payments, fraud, literacy, loans, budgeting, greeting\n\n' +
     'Rules:\n' +
     "- 'banking' = balance checks, account info, statements, deposits, withdrawals\n" +
+    "- 'loans' = EMI calculation, interest rates of loans, KCC or tractor loans information\n" +
+    "- 'budgeting' = monthly budgets, spending limits, savings advice\n" +
     "- 'schemes' = government schemes, yojana, eligibility, applications\n" +
-    "- 'payments' = sending money, UPI, recharge, bills, EMI\n" +
+    "- 'payments' = sending money, UPI, recharge, bills\n" +
     "- 'fraud' = scam reports, suspicious activity, OTP/PIN requests\n" +
     "- 'literacy' = financial education, explanations, 'what is X'\n" +
     "- 'greeting' = hello, thanks, bye, general conversation\n\n" +

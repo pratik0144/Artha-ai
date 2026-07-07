@@ -13,7 +13,10 @@
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.110.0",
     "axios": "^1.16.0",
+    "compromise": "^14.15.1",
     "lucide-react": "^1.14.0",
+    "msedge-tts": "^2.0.6",
+    "natural": "^8.1.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.15.0"

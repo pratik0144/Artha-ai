@@ -2,6 +2,20 @@
 
 All notable changes to the Artha AI project will be documented in this file.
 
+## [2.1.0] - 2026-07-07 — Offline Agentic & Speech-to-Text Optimization
+
+### Added
+- **Loans Specialist Agent (`loans.js`):** A dedicated loan advisory agent. Features offline mathematical calculation of monthly EMIs, total interest, and total repayment amounts based on user principal inputs. Provides localized guides on KCC, Tractor, and PM Mudra loans.
+- **Budgeting Specialist Agent (`budgeting.js`):** Analyzes the user's monthly income (credits) and expenses (debits) in the ledger, computes their remaining budget relative to their monthly limit, and gives context-aware warnings or savings recommendations.
+- **Natural Language Parsing Integrations:**
+  - **`compromise`:** Extracts numeric amounts, spelled-out numbers (e.g. "five thousand" -> 5000), and named entity recipients (e.g. "Arjun") to enable flexible conversational inputs.
+  - **`natural`:** Leverages Levenshtein distance on banking keywords to correct transcription or typing errors (e.g., "balnce" -> "balance") before intent classification.
+
+### Optimized
+- **Client-Side Audio Downsampling (`VoiceInteraction.jsx`):** Integrates browser `OfflineAudioContext` to downsample microphone captures from standard 48kHz stereo to 16kHz mono WAV. Reduces Speech-to-Text file size by over 85% (~120KB per upload), minimizing latency and data usage.
+- **Offline Registry Executions:** Handcoded zero-Gemini routes for 150+ multilingual intents, routing transfers, schemes, fixed deposits, budgets, and bill payments directly to Supabase queries/RPCs.
+- **Specialist Router Integrity:** Refined regex triggers in `agent-registry.js` to ensure informational loan or budget queries bypass transactional payment intercepts and route directly to their specialist agents.
+
 ## [2.0.0] - 2026-07-07 — Cloud-Native Migration
 
 ### Architecture Overhaul

@@ -246,7 +246,7 @@ Expected response:
     "active_key": 0,
     "key_stats": [...]
   },
-  "stt_engine": "Gemini 2.0 Flash (multimodal)",
+  "stt_engine": "Gemini 2.5 Flash (multimodal)",
   "version": "2.0-supabase"
 }
 ```
@@ -344,7 +344,7 @@ User Browser
                 │       ├── user_credits (frontend display)
                 │       └── api_key_usage (rotation tracking)
                 │
-                └── Google AI Studio (Gemini 2.0 Flash)
+                └── Google AI Studio (Gemini 2.5 Flash)
                         ├── 🔑 Key 1 (round-robin)
                         ├── 🔑 Key 2 (auto-failover on 429)
                         └── 🔑 Key 3 (fallback)

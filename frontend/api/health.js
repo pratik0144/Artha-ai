@@ -34,7 +34,7 @@ export default async function handler(req, res) {
         key_stats: keyStats,
       },
       primary_languages: ['Hindi (hi)', 'Kannada (kn)'],
-      stt_engine: 'Gemini 2.0 Flash (multimodal)',
+      stt_engine: 'Gemini 2.5 Flash (multimodal)',
       version: '2.0-supabase',
     });
   } catch (error) {

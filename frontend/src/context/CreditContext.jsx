@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { getCredits } from '../api';
+import { getCredits, getSessionId } from '../api';
 
 const CreditContext = createContext();
 
@@ -33,12 +33,18 @@ export const CreditProvider = ({ children }) => {
     pulseTimeoutRef.current = setTimeout(() => setIsPulsing(false), 1000);
 
     setCreditState((prev) => {
-      const totalCredits = data.total_credits ?? prev.totalCredits;
-      const usedCredits = data.credits_used ?? prev.usedCredits;
+      const totalCredits = data.total_credits ?? data.credits_total ?? prev.totalCredits;
+      const usedCredits = data.credits_used ?? data.used_credits ?? prev.usedCredits;
       const remaining = totalCredits - usedCredits;
       const activeKeyIndex = data.active_key_index ?? prev.activeKeyIndex;
-      const keyStatuses = data.key_statuses ?? prev.keyStatuses;
-
+      const rawKeyStatuses = data.key_statuses ?? data.key_stats ?? prev.keyStatuses;
+      const keyStatuses = Array.isArray(rawKeyStatuses)
+        ? rawKeyStatuses.map((k) => ({
+            ...k,
+            calls: k.calls ?? k.calls_today ?? 0,
+            calls_today: k.calls_today ?? k.calls ?? 0,
+          }))
+        : prev.keyStatuses;
       return {
         totalCredits,
         usedCredits,
@@ -85,6 +91,24 @@ export const CreditProvider = ({ children }) => {
       if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
     };
   }, []);
+
+  // Poll credit/key stats every 5 seconds if a session is active
+  useEffect(() => {
+    // Initial fetch
+    const sid = getSessionId();
+    if (sid) {
+      refreshCredits(sid);
+    }
+
+    const interval = setInterval(() => {
+      const sessionId = getSessionId();
+      if (sessionId) {
+        refreshCredits(sessionId);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [refreshCredits]);
 
   const remaining = creditState.totalCredits - creditState.usedCredits;
 

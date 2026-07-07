@@ -12,25 +12,25 @@ const apiClient = axios.create({
 });
 
 // ─── Helper: extract and broadcast credit info from API responses ───
+// ─── Helper: extract and broadcast credit info from API responses ───
 const dispatchCreditUpdate = (responseData) => {
-  if (
-    responseData &&
-    (responseData.credits_remaining !== undefined ||
-      responseData.credits_used !== undefined ||
-      responseData.total_credits !== undefined)
-  ) {
+  if (!responseData) return;
+
+  const total = responseData.credits_total ?? responseData.total_credits;
+  const used = responseData.credits_used ?? responseData.used_credits;
+  const remaining = responseData.credits_remaining ?? responseData.remaining_credits;
+
+  if (total !== undefined || used !== undefined || remaining !== undefined) {
+    const totalVal = total !== undefined ? total : 50;
+    const usedVal = used !== undefined ? used : (remaining !== undefined ? totalVal - remaining : 0);
+    const keyStats = responseData.key_statuses ?? responseData.key_stats;
+
     const event = new CustomEvent('credit-update', {
       detail: {
-        credits_used: responseData.credits_used,
-        total_credits: responseData.total_credits,
+        total_credits: totalVal,
+        credits_used: usedVal,
         active_key_index: responseData.active_key_index,
-        key_statuses: responseData.key_statuses,
-        // Support credits_remaining fallback
-        ...(responseData.credits_remaining !== undefined && {
-          credits_used:
-            (responseData.total_credits ?? 50) - responseData.credits_remaining,
-          total_credits: responseData.total_credits ?? 50,
-        }),
+        key_statuses: keyStats,
       },
     });
     window.dispatchEvent(event);
@@ -77,12 +77,16 @@ export const onboardUser = async (profileData) => {
   }
 };
 
-export const sendChatMessage = async (accountId, message) => {
+export const sendChatMessage = async (accountId, message, language = null) => {
   try {
-    const response = await apiClient.post('/api/chat', {
+    const payload = {
       account_id: accountId,
       message,
-    });
+    };
+    if (language) {
+      payload.language = language;
+    }
+    const response = await apiClient.post('/api/chat', payload);
     dispatchCreditUpdate(response.data);
     return response.data;
   } catch (error) {
@@ -106,22 +110,25 @@ export const resetSession = async (accountId) => {
 
 export const transcribeAudio = async (audioBlob, hintLanguage = null) => {
   try {
-    const formData = new FormData();
-    // Use an arbitrary filename
-    formData.append('audio', audioBlob, 'voice_input.webm');
-
-    if (hintLanguage) {
-      formData.append('hint_language', hintLanguage);
-    }
-
-    const headers = { 'Content-Type': 'multipart/form-data' };
-    if (_sessionId) {
-      headers['X-Session-Id'] = _sessionId;
-    }
-
-    const response = await axios.post(`${API_BASE_URL}/api/stt`, formData, {
-      headers,
+    // Convert Blob to base64 string
+    const reader = new FileReader();
+    const base64Promise = new Promise((resolve, reject) => {
+      reader.onloadend = () => {
+        // base64 url prefix looks like: "data:audio/webm;base64,..."
+        const base64data = reader.result.split(',')[1];
+        resolve(base64data);
+      };
+      reader.onerror = reject;
     });
+    reader.readAsDataURL(audioBlob);
+    const base64Audio = await base64Promise;
+
+    const response = await apiClient.post('/api/stt', {
+      audio_base64: base64Audio,
+      mime_type: audioBlob.type || 'audio/webm',
+      hint_language: hintLanguage
+    });
+    
     dispatchCreditUpdate(response.data);
     return response.data;
   } catch (error) {
@@ -130,19 +137,10 @@ export const transcribeAudio = async (audioBlob, hintLanguage = null) => {
   }
 };
 
-export const generateSpeech = async (text, lang = 'hi') => {
-  try {
-    const response = await apiClient.post(
-      '/api/tts',
-      { text, lang },
-      { responseType: 'blob' } // Important for audio files
-    );
-    return response.data;
-  } catch (error) {
-    console.error('TTS failed:', error);
-    throw error;
-  }
-};
+// TTS is handled via useSpeechSynthesis hook:
+//   PRIMARY:  /api/tts (msedge-tts neural voices — Siri/Alexa quality)
+//   FALLBACK: Browser SpeechSynthesis API (offline)
+
 
 export const getCredits = async (sessionId) => {
   try {

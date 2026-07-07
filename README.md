@@ -26,7 +26,7 @@ The platform uses a **cloud-native serverless architecture** — zero local serv
               │                      │                      │
     ┌─────────▼─────────┐  ┌────────▼────────┐  ┌─────────▼─────────┐
     │  Supabase (Free)   │  │ Google AI Studio│  │  3-Key Rotation   │
-    │  PostgreSQL DB     │  │ Gemini 2.0 Flash│  │  🔑 Key 1         │
+    │  PostgreSQL DB     │  │ Gemini 2.5 Flash│  │  🔑 Key 1         │
     │  13 tables + RLS   │  │ Chat + STT      │  │  🔑 Key 2         │
     │  Rate limit tables │  │ (Free tier)     │  │  🔑 Key 3         │
     └────────────────────┘  └─────────────────┘  └───────────────────┘
@@ -98,17 +98,19 @@ DigiSeva/
 - **Fraud Prevention Alerts:** High-visibility alerts triggered by backend security checks.
 
 ### Backend (Agentic Infrastructure)
-- **Voice-First Interaction:** Speech-to-Text via Gemini 2.0 Flash multimodal audio input, replacing local Whisper. Browser Web Speech API for TTS.
+- **Voice-First Interaction:** Speech-to-Text via Gemini 2.5 Flash multimodal audio input, replacing local Whisper. Optimized with **client-side downsampling** (converting 48kHz stereo to 16kHz mono WAV) to reduce payload sizes by 85%+ (~120KB upload) and minimize network latency.
 - **Multilingual Intelligence:** Deep support for Hindi and Kannada, with Unicode script-based language detection across 10 Indian languages.
 - **3-Key Gemini API Rotation:** Three Google AI Studio API keys with round-robin rotation and automatic failover on 429 errors. Per-key usage tracking in Supabase.
 - **Per-Session Rate Limiting:** 15 requests/minute + 200 requests/day per user session, enforced via Supabase with real-time credit display on the frontend.
-- **Agentic Orchestration:**
+- **Agentic Orchestration & Specialist Swarm:**
   - **Orchestrator Pipeline:** Language detect → fraud screen → intent classify → agent dispatch.
-  - **Banking Agent:** Handles balances, transactions, loans, FDs, transfers — queries Supabase directly.
+  - **Banking Agent:** Handles balances, transactions, and bills — queries Supabase directly.
   - **Schemes Agent:** Recommends government schemes using rule-based scoring engine + 50+ scheme database.
   - **FraudGuard Agent:** Zero-latency scam interception with pattern matching and event logging.
   - **Literacy Agent:** Explains financial concepts using simple rural analogies.
-- **Robust Intent Classification:** Keyword matching (Hindi/Kannada/English) for ultra-fast classification, with Gemini LLM fallback for ambiguous queries.
+  - **Loans Agent (New):** Loan Specialist Agent that calculates monthly EMIs and interest rates offline.
+  - **Budgeting Agent (New):** Analyst Agent that evaluates monthly income, spending, and limits to provide context-aware savings advice.
+- **Robust Intent Classification & NLP Integration:** Integrated **`compromise`** to parse spelled-out numbers/names and **`natural`** for Levenshtein-distance spelling correction. Bypasses Gemini entirely for 150+ common intents via the local registry.
 
 ---
 

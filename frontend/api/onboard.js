@@ -51,12 +51,18 @@ export default async function handler(req, res) {
     };
 
     // Upsert session
-    await supabase.from('sessions').upsert({
+    const { error: upsertError } = await supabase.from('sessions').upsert({
+      session_id: accountId,
       account_id: accountId,
       profile,
       conversation_history: [],
       created_at: new Date().toISOString(),
-    }, { onConflict: 'account_id' });
+    }, { onConflict: 'session_id' });
+
+    if (upsertError) {
+      console.error('[onboard] Upsert session error:', upsertError);
+      return res.status(500).json({ status: 'error', message: 'Failed to create session', detail: upsertError.message });
+    }
 
     // Initialize credits
     await initializeCredits(supabase, accountId);

@@ -10,6 +10,7 @@ import { detectLanguage, checkFraudLanguage } from './_lib/language-layer.js';
 import { classifyIntent } from './_lib/intent-classifier.js';
 import { dispatch } from './_lib/agents/dispatcher.js';
 import { getActiveKeyIndex, getKeyUsageStats } from './_lib/gemini-pool.js';
+import { executeAgenticTask } from './_lib/agent-registry.js';
 
 export default async function handler(req, res) {
   // CORS
@@ -21,11 +22,18 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ status: 'error', message: 'Method not allowed' });
 
   try {
-    const { account_id, message } = req.body || {};
+    const { account_id, message, language } = req.body || {};
     const sessionId = account_id || req.headers['x-session-id'];
 
-    if (!sessionId) return res.status(400).json({ status: 'error', message: 'account_id is required' });
-    if (!message || !message.trim()) return res.status(400).json({ status: 'error', message: 'message is required' });
+    if (!sessionId || typeof sessionId !== 'string' || !/^[A-Za-z0-9_-]{2,50}$/.test(sessionId)) {
+      return res.status(400).json({ status: 'error', message: 'Invalid or missing account_id' });
+    }
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ status: 'error', message: 'message is required' });
+    }
+    if (message.length > 500) {
+      return res.status(400).json({ status: 'error', message: 'Message is too long (maximum 500 characters)' });
+    }
 
     const supabase = getSupabase();
 
@@ -55,39 +63,56 @@ export default async function handler(req, res) {
     const profile = session.profile || {};
     const history = session.conversation_history || [];
 
-    // 3. Language detection
-    const lang = detectLanguage(message);
+    // 3. Language detection — prefer the language of the actual message or explicit parameter override
+    const lang = language || detectLanguage(message);
+    // Use detected/provided message language first; only fall back to profile if message is English
+    const responseLang = language || ((lang !== 'en') ? lang : (profile.language || lang));
 
-    // 4. Fraud screening
-    const fraudCheck = checkFraudLanguage(message, lang);
-
-    // 5. Intent classification
-    let intent = await classifyIntent(message, supabase);
-    if (fraudCheck.is_fraud) intent = 'fraud';
-
-    // 6. Build context
-    const context = {
-      account_id: profile.account_id || sessionId,
-      name: profile.name || 'User',
-      language: profile.language || lang,
-      occupation: profile.occupation || 'unknown',
-      income_bracket: profile.income_bracket || 'unknown',
-      fraud_risk: profile.fraud_risk || 'medium',
-      eligible_schemes: profile.eligible_schemes || [],
-    };
-
-    // 7. Handle fraud — skip agent if fraud auto-detected
+    // 4. Try hardcoded local response mapping (Agentic task or Q&A) to bypass Gemini
+    const localText = await executeAgenticTask(supabase, sessionId, message, responseLang, profile);
     let agentResponse;
-    if (fraudCheck.is_fraud) {
+    let intent = 'unknown';
+    let fraudCheck = { is_fraud: false };
+
+    if (localText) {
       agentResponse = {
-        response: fraudCheck.warning,
-        agent: 'fraud_guard_auto',
-        model_used: 'none',
+        response: localText,
+        agent: localText.includes('⚠️') ? 'fraud' : 'local-logic',
+        model_used: 'local-logic',
         key_index: -1,
       };
+      intent = localText.includes('⚠️') ? 'fraud' : 'local-info';
     } else {
-      const routeResult = { intent, language: lang, fraud_check: fraudCheck, route_to: intent };
-      agentResponse = await dispatch(supabase, routeResult, message.trim(), history, context);
+      // 5. Fraud screening
+      fraudCheck = checkFraudLanguage(message, lang);
+
+      // 6. Intent classification
+      intent = await classifyIntent(message, supabase);
+      if (fraudCheck.is_fraud) intent = 'fraud';
+
+      // 7. Build context
+      const context = {
+        account_id: profile.account_id || sessionId,
+        name: profile.name || 'User',
+        language: responseLang,
+        occupation: profile.occupation || 'unknown',
+        income_bracket: profile.income_bracket || 'unknown',
+        fraud_risk: profile.fraud_risk || 'medium',
+        eligible_schemes: profile.eligible_schemes || [],
+      };
+
+      // 8. Handle fraud / dispatch
+      if (fraudCheck.is_fraud) {
+        agentResponse = {
+          response: fraudCheck.warning,
+          agent: 'fraud_guard_auto',
+          model_used: 'none',
+          key_index: -1,
+        };
+      } else {
+        const routeResult = { intent, language: lang, fraud_check: fraudCheck, route_to: intent };
+        agentResponse = await dispatch(supabase, routeResult, message.trim(), history, context);
+      }
     }
 
     // 8. Update conversation history

@@ -265,6 +265,19 @@ export const FRAUD_KEYWORDS = {
     'PIN batao',
     'password batao',
     'verification ke liye paisa bhejo',
+    'UPI pin share karo',
+    'UPI pin batao',
+    'screen share karo',
+    'anydesk download karo',
+    'teamviewer install karo',
+    'electricity bill update',
+    'pan card link karo',
+    'account suspend ho gaya',
+    'loan approved verify karo',
+    'processing fee bhejo',
+    'KBC lottery mili hai',
+    'police arrest karegi',
+    'urgent money transfer',
   ],
   kn: [
     'OTP heli',
@@ -287,6 +300,21 @@ export const FRAUD_KEYWORDS = {
     'PIN heli',
     'password heli',
     'verification ge haana kalisi',
+    'UPI pin share maadi',
+    'UPI pin heli',
+    'screen share maadi',
+    'anydesk download maadi',
+    'teamviewer install maadi',
+    'account limit exceed aagide',
+    'electricity bill outstanding ide',
+    'loan approved verify maadi',
+    'pan card update maadi',
+    'urgent haana kalisi',
+    'sim card block aagutte',
+    'policera hesaralli warrant ide',
+    'account block aagide',
+    'verification ge money kalisi',
+    'app install maadi',
   ],
 };
 
@@ -303,14 +331,25 @@ const FRAUD_WARNINGS = {
     'ಯಾರಾದರೂ ಹಾಗೆ ಹೇಳಿದರೆ, ತಕ್ಷಣ ಫೋನ್ ಕಟ್ ಮಾಡಿ.',
 };
 
+// Format values to Indian Currency format (Lakh/Crore system)
+export function formatINR(amount) {
+  if (amount === undefined || amount === null || isNaN(amount)) return '0.00';
+  return Number(amount).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
 /**
  * Scan text against known fraud/scam keywords.
  *
  * @param {string} text - User input text
  * @param {string} lang - Language code ("hi" or "kn")
- * @returns {{ is_fraud, matched, warning }}
+ * @param {object|boolean} options - Request options or boolean flag to include risk assessment
+ * @returns {{ is_fraud, matched, warning, risk_score?, velocity_recommendation? }}
  */
-export function checkFraudLanguage(text, lang = 'hi') {
+export function checkFraudLanguage(text, lang = 'hi', options = {}) {
+  const requestRisk = typeof options === 'boolean' ? options : !!(options && options.requestRisk);
   const effectiveLang = FRAUD_KEYWORDS[lang] ? lang : 'hi';
   const keywords = FRAUD_KEYWORDS[effectiveLang];
   const textLower = text.toLowerCase().trim();
@@ -327,7 +366,37 @@ export function checkFraudLanguage(text, lang = 'hi') {
     ? FRAUD_WARNINGS[effectiveLang] || FRAUD_WARNINGS.hi
     : '';
 
-  return { is_fraud: isFraud, matched, warning };
+  const result = { is_fraud: isFraud, matched, warning };
+
+  if (requestRisk) {
+    let risk_score = 'LOW';
+    let velocity_recommendation = 'Allow normal transactions';
+
+    if (isFraud) {
+      const hasCriticalKeyword = matched.some(phrase => {
+        const p = phrase.toLowerCase();
+        return p.includes('otp') || p.includes('pin') || p.includes('password') ||
+               p.includes('credential') || p.includes('ओटीपी') || p.includes('पिन') ||
+               p.includes('पासवर्ड') || p.includes('ಒಟಿಪಿ') || p.includes('ಪಿನ್');
+      });
+
+      if (matched.length >= 3 || hasCriticalKeyword) {
+        risk_score = 'CRITICAL';
+        velocity_recommendation = 'Block all transactions immediately. Suspend UPI and net banking transfers.';
+      } else if (matched.length === 2) {
+        risk_score = 'HIGH';
+        velocity_recommendation = `Limit transaction velocity to 1 transaction per 24 hours. Hold transactions above ₹${formatINR(5000)}.`;
+      } else {
+        risk_score = 'MEDIUM';
+        velocity_recommendation = `Limit transaction velocity to 1 transaction per hour, maximum ₹${formatINR(10000)} per transaction.`;
+      }
+    }
+
+    result.risk_score = risk_score;
+    result.velocity_recommendation = velocity_recommendation;
+  }
+
+  return result;
 }
 
 // ── 5. GREETINGS ───────────────────────────────────────────────

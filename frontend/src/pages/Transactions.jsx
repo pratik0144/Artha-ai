@@ -6,6 +6,7 @@ import { useSession } from '../context/SessionContext';
 export const Transactions = () => {
   const { profile } = useSession();
   const [transactions, setTransactions] = useState([]);
+  const [balance, setBalance] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -13,11 +14,11 @@ export const Transactions = () => {
       if (!profile?.account_id) return;
       try {
         setIsLoading(true);
-        const res = await fetch(`http://localhost:5001/account/${profile.account_id}/transactions?last_n=10`);
+        const res = await fetch(`/api/transactions?account_id=${profile.account_id}&last_n=10`);
         const data = await res.json();
         if (data.status === 'success') {
-          // reverse to show newest first if the API returns chronological
-          setTransactions(data.transactions.reverse());
+          setTransactions(data.transactions);
+          setBalance(data.balance);
         }
       } catch (err) {
         console.error("Failed to fetch transactions:", err);
@@ -36,6 +37,14 @@ export const Transactions = () => {
           <h2 className="h2 text-primary">Transactions</h2>
           <p className="body-sm text-secondary mt-1">Your recent account activity</p>
         </div>
+        {balance !== null && (
+          <div className="text-right">
+            <span className="text-xs text-secondary font-bold uppercase tracking-wider">Avl Bal.</span>
+            <p className="h3 text-primary font-bold mt-1">
+              ₹{Number(balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mb-6 relative">

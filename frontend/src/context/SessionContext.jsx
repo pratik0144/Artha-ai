@@ -189,8 +189,29 @@ export const SessionProvider = ({ children }) => {
     await initializeApp(newLang);
   };
 
-  const sendMessage = async (messageText) => {
+  const sendMessage = async (messageText, language = null) => {
     if (!messageText.trim() || !profile) return;
+
+    // Check session message limit (max 30 queries)
+    const sessionKey = `artha_session_msg_count_${profile.account_id}`;
+    const currentCount = parseInt(sessionStorage.getItem(sessionKey) || '0', 10);
+    const limit = 30;
+
+    if (currentCount >= limit) {
+      const errorContent = 
+        appLang === 'hi' ? `⚠️ सत्र संदेश सीमा समाप्त (अधिकतम ${limit} प्रश्न)। कृपया अपना सत्र रीसेट करें।` :
+        appLang === 'kn' ? `⚠️ ಸೆಷನ್ ಸಂದೇಶ ಮಿತಿ ತಲುಪಿದೆ (ಗರಿಷ್ಠ ${limit} ಪ್ರಶ್ನೆಗಳು). ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸೆಷನ್ ಮರುಹೊಂದಿಸಿ.` :
+        `⚠️ Session query limit reached (max ${limit} queries). Please reset your session.`;
+
+      const userMsg = { role: 'user', content: messageText };
+      const limitNotice = {
+        role: 'assistant',
+        content: errorContent,
+        agent: 'system'
+      };
+      setHistory(prev => [...prev, userMsg, limitNotice]);
+      return null;
+    }
 
     // Add user message to UI immediately
     const userMsg = { role: 'user', content: messageText };
@@ -199,9 +220,12 @@ export const SessionProvider = ({ children }) => {
     setLatestFraudAlert(null);
 
     try {
-      const result = await sendChatMessage(profile.account_id, messageText);
+      const result = await sendChatMessage(profile.account_id, messageText, language || appLang);
 
       if (result.status === 'success') {
+        // Increment message count on success
+        sessionStorage.setItem(sessionKey, (currentCount + 1).toString());
+
         // If fraud was triggered, handle it prominently
         if (result.fraud_triggered) {
           const alertData = {
@@ -245,6 +269,8 @@ export const SessionProvider = ({ children }) => {
   const clearSession = async () => {
     if (profile) {
       await resetSession(profile.account_id);
+      const sessionKey = `artha_session_msg_count_${profile.account_id}`;
+      sessionStorage.removeItem(sessionKey);
       const t = UI_DICT[appLang] || UI_DICT['en'];
       setHistory([{ role: 'assistant', content: t.greeting, agent: 'greeting' }]);
       setLatestFraudAlert(null);

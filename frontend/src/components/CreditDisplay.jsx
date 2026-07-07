@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Zap, Key } from 'lucide-react';
+import { Zap, Key, MessageCircle } from 'lucide-react';
 import { useCredits } from '../context/CreditContext';
+import { useSession } from '../context/SessionContext';
 import './CreditDisplay.css';
 
 const CIRCUMFERENCE = 2 * Math.PI * 14; // radius = 14
@@ -18,6 +19,15 @@ export const CreditDisplay = () => {
   } = useCredits();
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Session query limit tracking
+  const { profile } = useSession();
+  const SESSION_LIMIT = 30;
+  const sessionKey = profile ? `artha_session_msg_count_${profile.account_id}` : null;
+  const sessionQueriesUsed = sessionKey ? parseInt(sessionStorage.getItem(sessionKey) || '0', 10) : 0;
+  const sessionQueriesRemaining = SESSION_LIMIT - sessionQueriesUsed;
+  const isSessionLow = sessionQueriesRemaining <= 5 && sessionQueriesRemaining > 2;
+  const isSessionCritical = sessionQueriesRemaining <= 2;
 
   const usagePercent = totalCredits > 0 ? (usedCredits / totalCredits) * 100 : 0;
   const dashOffset = CIRCUMFERENCE - (usagePercent / 100) * CIRCUMFERENCE;
@@ -148,6 +158,26 @@ export const CreditDisplay = () => {
               style={{ color: '#e6c365', fontWeight: 600 }}
             >
               ⚡ Credits running low
+            </div>
+          )}
+
+          {/* Session query limit indicator */}
+          <div className="credit-detail-row" style={{
+            color: isSessionCritical ? '#e05555' : isSessionLow ? '#e6c365' : 'inherit',
+            fontWeight: isSessionLow || isSessionCritical ? 600 : 400
+          }}>
+            <span>
+              <MessageCircle size={10} className="key-icon" />
+              Session Queries
+            </span>
+            <span className="detail-value">{sessionQueriesUsed}/{SESSION_LIMIT}</span>
+          </div>
+          {isSessionCritical && (
+            <div
+              className="credit-detail-row"
+              style={{ color: '#e05555', fontWeight: 600, fontSize: '0.7rem' }}
+            >
+              ⚠ Session limit almost reached! Reset to continue.
             </div>
           )}
         </div>

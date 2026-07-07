@@ -19,7 +19,7 @@ const API_KEYS = [
   process.env.GEMINI_API_KEY_3,
 ].filter(Boolean);
 
-const MODEL_NAME = 'gemini-2.0-flash';
+const MODEL_NAME = 'gemini-2.5-flash';
 
 // In-memory state for fast round-robin (resets per cold start)
 let _currentKeyIndex = 0;
@@ -61,6 +61,52 @@ function isQuotaError(error) {
     msg.includes('resource exhausted') ||
     msg.includes('too many requests')
   );
+}
+
+/**
+ * Helper to retry a function with exponential backoff on non-quota transient errors.
+ * Retries up to 3 times (4 attempts total), with backoff.
+ */
+async function retryWithBackoff(fn, isQuotaErrorCheck) {
+  const maxRetries = 3;
+  let delay = 1000; // start with 1 second delay
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (isQuotaErrorCheck(error) || attempt === maxRetries) {
+        throw error;
+      }
+
+      const msg = (error?.message || '').toLowerCase();
+      const status = error?.status || error?.httpStatusCode || 0;
+      const isTransient = 
+        status === 503 ||
+        status === 502 ||
+        status === 504 ||
+        status === 408 ||
+        msg.includes('503') ||
+        msg.includes('502') ||
+        msg.includes('504') ||
+        msg.includes('socket hang up') ||
+        msg.includes('network') ||
+        msg.includes('timeout') ||
+        msg.includes('econnrefused') ||
+        msg.includes('fetch failed') ||
+        msg.includes('transient');
+
+      if (!isTransient) {
+        throw error;
+      }
+
+      console.warn(
+        `[gemini-pool] Transient error encountered (attempt ${attempt + 1}/${maxRetries + 1}): ${error.message?.slice(0, 120)}. Retrying in ${delay}ms...`
+      );
+
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 2; // exponential backoff
+    }
+  }
 }
 
 /**
@@ -152,7 +198,7 @@ export async function callGemini(
   systemPrompt,
   userMessage,
   history = [],
-  maxTokens = 300
+  maxTokens = 1000
 ) {
   if (API_KEYS.length === 0) {
     throw new Error('No Gemini API keys configured');
@@ -178,16 +224,21 @@ export async function callGemini(
         parts: [{ text: msg.content }],
       }));
 
-      const chat = model.startChat({
-        history: chatHistory,
-        generationConfig: {
-          maxOutputTokens: maxTokens,
-          temperature: 0.3,
-        },
-      });
+      const contents = [
+        ...chatHistory,
+        { role: 'user', parts: [{ text: userMessage }] }
+      ];
 
-      const result = await chat.sendMessage(userMessage);
-      const text = result.response.text().trim();
+      const text = await retryWithBackoff(async () => {
+        const result = await model.generateContent({
+          contents,
+          generationConfig: {
+            maxOutputTokens: maxTokens,
+            temperature: 0.3,
+          },
+        });
+        return result.response.text().trim();
+      }, isQuotaError);
 
       // Success — advance round-robin and log
       _currentKeyIndex = (keyIndex + 1) % API_KEYS.length;
@@ -272,17 +323,18 @@ export async function transcribeAudio(
       // Convert audio bytes to base64
       const base64Audio = Buffer.from(audioBytes).toString('base64');
 
-      const result = await model.generateContent([
-        { text: systemPrompt + '\n\n' + userPrompt },
-        {
-          inlineData: {
-            mimeType: mimeType,
-            data: base64Audio,
+      const text = await retryWithBackoff(async () => {
+        const result = await model.generateContent([
+          { text: systemPrompt + '\n\n' + userPrompt },
+          {
+            inlineData: {
+              mimeType: mimeType,
+              data: base64Audio,
+            },
           },
-        },
-      ]);
-
-      const text = result.response.text().trim();
+        ]);
+        return result.response.text().trim();
+      }, isQuotaError);
 
       _currentKeyIndex = (keyIndex + 1) % API_KEYS.length;
       await logKeyUsage(supabase, keyIndex, true);
