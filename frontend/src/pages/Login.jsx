@@ -18,7 +18,7 @@ export const Login = () => {
     setError('');
     
     // Simulate login by passing the account ID to the session context
-    // The context will fetch the full profile from the mock bank
+    // The context will fetch the full profile from Supabase via /api/onboard
     const success = await login(accountId.trim());
     if (!success) {
       setError('Invalid Account ID. Please try again.');

@@ -115,34 +115,7 @@ export const SessionProvider = ({ children }) => {
   const initializeApp = async (lang = 'en', accountId = 'JD-1001') => {
     setIsLoading(true);
     try {
-      // 1. Fetch from Mock Bank
-      const bankRes = await fetch(`http://localhost:5001/account/lookup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ account_id: accountId })
-      });
-
-      const bankData = await bankRes.json();
-
-      if (bankData.status !== 'success') {
-        throw new Error("Invalid account ID");
-      }
-
-      const acct = bankData.data;
-
-      const accountData = {
-        account_id: acct.account_id,
-        name: acct.name,
-        language: lang,
-        occupation: acct.occupation,
-        income_bracket: acct.bpl_card ? "low" : "medium",
-        has_smartphone: acct.has_smartphone,
-        location: acct.location_type,
-        fraud_risk: acct.fraud_history ? "high" : "low",
-        eligible_schemes: acct.linked_schemes || []
-      };
-
-      const result = await onboardUser(accountData);
+      const result = await onboardUser({ account_id: accountId, language: lang });
 
       if (result.status === 'success') {
         setProfile(result.profile);

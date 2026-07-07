@@ -3,11 +3,10 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useSession } from '../context/SessionContext';
 import { CheckCircle2, FileText, IndianRupee, Search, ChevronDown, ChevronUp, ExternalLink, Loader2 } from 'lucide-react';
-
-const API = 'http://localhost:5005';
+import { getAllSchemes, recommendSchemes } from '../api';
 
 export const Schemes = () => {
-  const { schemes: activeSchemes, account } = useSession();
+  const { schemes: activeSchemes, profile } = useSession();
   const [recommended, setRecommended] = useState([]);
   const [allSchemes, setAllSchemes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,16 +18,19 @@ export const Schemes = () => {
     const fetchSchemes = async () => {
       setLoading(true);
       try {
-        const [recRes, allRes] = await Promise.all([
-          fetch(`${API}/schemes/recommend?account_id=${account?.account_id || 'JD-1001'}&lang=${account?.language || 'hi'}&occupation=${encodeURIComponent(account?.occupation || 'farmer')}`),
-          fetch(`${API}/schemes/all`)
+        const [recData, allData] = await Promise.all([
+          recommendSchemes({
+            account_id: profile?.account_id || 'JD-1001',
+            occupation: profile?.occupation || 'farmer',
+            income_bracket: profile?.income_bracket || 'medium',
+            state: profile?.location || 'Punjab'
+          }),
+          getAllSchemes()
         ]);
-        if (recRes.ok) {
-          const recData = await recRes.json();
-          setRecommended(recData.recommended || []);
+        if (recData && recData.status === 'success') {
+          setRecommended(recData.recommendations || []);
         }
-        if (allRes.ok) {
-          const allData = await allRes.json();
+        if (allData && allData.status === 'success') {
           setAllSchemes(allData.schemes || []);
         }
       } catch (e) {
@@ -37,7 +39,7 @@ export const Schemes = () => {
       setLoading(false);
     };
     fetchSchemes();
-  }, [account]);
+  }, [profile]);
 
   const displaySchemes = tab === 'recommended' ? recommended : allSchemes;
   const filtered = searchQuery

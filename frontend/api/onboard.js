@@ -29,9 +29,11 @@ export default async function handler(req, res) {
 
     // Fetch eligible schemes
     let eligibleSchemes = [];
-    if (acct) {
+    if (acct && acct.linked_schemes && acct.linked_schemes.length > 0) {
       const { data: schemes } = await supabase
-        .from('government_schemes').select('name, benefit_amount, description_hindi, description_kannada, how_to_apply');
+        .from('government_schemes')
+        .select('name, benefit_amount, description_hindi, description_kannada, how_to_apply')
+        .in('name', acct.linked_schemes);
       eligibleSchemes = schemes || [];
     }
 
@@ -41,10 +43,10 @@ export default async function handler(req, res) {
       name: acct?.name || data.name || `User-${accountId}`,
       language,
       occupation: acct?.occupation || data.occupation || 'unknown',
-      income_bracket: data.income_bracket || 'unknown',
-      has_smartphone: acct?.has_smartphone || data.has_smartphone || false,
+      income_bracket: acct ? (acct.bpl_card ? "low" : "medium") : (data.income_bracket || 'unknown'),
+      has_smartphone: acct?.has_smartphone !== undefined ? acct.has_smartphone : (data.has_smartphone || false),
       location: acct?.location || data.location || 'unknown',
-      fraud_risk: data.fraud_risk || 'medium',
+      fraud_risk: acct ? (acct.fraud_history ? "high" : "low") : (data.fraud_risk || 'medium'),
       eligible_schemes: acct?.linked_schemes || [],
       concern: data.concern || '',
       scheme_exp: data.scheme_exp || '',
