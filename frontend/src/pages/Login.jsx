@@ -100,21 +100,21 @@ export const Login = () => {
 
           <div className="text-xs text-secondary mb-2 text-center font-medium">Other Available Mock Accounts:</div>
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <button onClick={() => handleQuickLogin('SB-2001')} className="p-2 bg-surface text-left rounded border hover:border-primary transition-colors">
+            <button onClick={() => handleQuickLogin('JD-1002')} className="p-2 bg-surface text-left rounded border hover:border-primary transition-colors">
               <div className="font-semibold text-on-surface">JD-1002</div>
-              <div className="text-xs text-secondary">Fatima (Unemployed)</div>
+              <div className="text-xs text-secondary">Fatima Bi (Unemployed)</div>
             </button>
             <button onClick={() => handleQuickLogin('SB-2001')} className="p-2 bg-surface text-left rounded border hover:border-primary transition-colors">
               <div className="font-semibold text-on-surface">SB-2001</div>
-              <div className="text-xs text-secondary">Savitha (Laborer)</div>
+              <div className="text-xs text-secondary">Savitha Gowda (Laborer)</div>
             </button>
             <button onClick={() => handleQuickLogin('SB-2002')} className="p-2 bg-surface text-left rounded border hover:border-primary transition-colors">
               <div className="font-semibold text-on-surface">SB-2002</div>
-              <div className="text-xs text-secondary">Meera (Homemaker)</div>
+              <div className="text-xs text-secondary">Meera Devi (Homemaker)</div>
             </button>
             <button onClick={() => handleQuickLogin('SB-3001')} className="p-2 bg-surface text-left rounded border hover:border-primary transition-colors">
               <div className="font-semibold text-on-surface">SB-3001</div>
-              <div className="text-xs text-secondary">Arjun (Shop Owner)</div>
+              <div className="text-xs text-secondary">Arjun Singh (Shop Owner)</div>
             </button>
           </div>
         </Card>

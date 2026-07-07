@@ -196,15 +196,21 @@ Every `/api/chat` response includes credit tracking data:
 
 ---
 
-## 👤 Demo Accounts
+## 👤 Demo Accounts & Login
 
-| Account ID | Name | Language | Occupation |
-|------------|------|----------|------------|
-| `JD-1001` | Ramesh Kumar | Hindi | Farmer |
-| `SB-2001` | Savitha Gowda | Kannada | Farmer |
-| `SB-2002` | Meera Devi | Hindi | Homemaker |
-| `SB-3001` | Raju M | Kannada | Daily Wager |
-| `JD-1002` | Lakshmi Bai | Hindi | Shop Owner |
+> **PIN / Password:** Any 4-digit PIN works (e.g. `1234`). The password field is a mock — authentication is by Account ID only.
+
+| Account ID | Name | PIN | Balance | Language | Occupation | Phone |
+|------------|------|-----|---------|----------|------------|-------|
+| `JD-1001` | Ramesh Kumar | `1234` | ₹4,200 | Hindi | Farmer | 9876543210 |
+| `JD-1002` | Fatima Bi | `1234` | ₹900 | Hindi/Urdu | Unemployed | 9876543214 |
+| `SB-2001` | Savitha Gowda | `1234` | ₹1,800 | Kannada | Farm Labour | 9876543211 |
+| `SB-2002` | Meera Devi | `1234` | ₹6,500 | Hindi/Tamil | Homemaker | 9876543212 |
+| `SB-3001` | Arjun Singh | `1234` | ₹22,000 | Hindi | Shop Owner | 9876543213 |
+| `NONE-0001` | Suresh Nayak | `1234` | ₹0 | Kannada | Daily Wager | 9876543215 |
+
+**Quick Login:** The login page has one-click buttons for all test accounts. Default tester is `JD-1001` (Ramesh Kumar).
+
 
 ---
 
