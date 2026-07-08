@@ -16,12 +16,12 @@ let _client = null;
 export function getSupabase() {
   if (_client) return _client;
 
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
     throw new Error(
-      'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables'
+      'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables (or VITE_ fallbacks)'
     );
   }
 
