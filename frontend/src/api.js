@@ -174,3 +174,32 @@ export const recommendSchemes = async (profileData) => {
     throw error;
   }
 };
+
+export const getFraudHistory = async (accountId) => {
+  try {
+    const response = await apiClient.get('/api/fraud-history', {
+      params: { account_id: accountId }
+    });
+    dispatchCreditUpdate(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Get fraud history failed:', error);
+    throw error;
+  }
+};
+
+export const submitFraudReport = async (accountId, contactInfo, details) => {
+  try {
+    const response = await apiClient.post('/api/fraud-report', {
+      account_id: accountId,
+      contact_info: contactInfo,
+      details: details
+    });
+    dispatchCreditUpdate(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Submit fraud report failed:', error);
+    throw error;
+  }
+};
+

@@ -44,6 +44,12 @@ export async function runLoansAgent(supabase, context, userMessage, history) {
   }
 
   const langInstruction = getSystemPromptLanguageInstruction(lang);
+
+  // Inject cross-account financial context from the RM layer (if available)
+  const financialCtx = context.financial_context_text
+    ? `\n\nThis user's financial profile (use to give personalized advice):\n${context.financial_context_text}`
+    : '';
+
   const systemPrompt = `You are an expert Loan Specialist Agent assisting rural Indian farmers and micro-business owners.
 Your role is to provide clear, trustworthy, and supportive loan advisory.
 ${langInstruction}
@@ -53,6 +59,7 @@ Core Guidelines:
 2. Explain key terms simply (e.g., Interest = cost of borrowing, EMI = monthly share, Collateral = security).
 3. Keep responses concise (maximum 3 sentences) for users with limited literacy.
 4. Warn against high-interest informal lenders (moneylenders) and encourage formal bank loans (KCC, Mudra).
+5. When the user's financial profile is available, use their actual EMI-to-income ratio, balance, and spending data to give specific advice rather than generic guidance.
 
 Few-Shot Examples:
 User: "मुझे खेती के लिए 1 लाख का लोन चाहिए, क्या करूँ?"
@@ -62,7 +69,7 @@ User: "ಸಣ್ಣ ಅಂಗಡಿ ಇಡಲು ಲೋನ್ ಸಿಗುತ್
 Assistant: "ಹೌದು, ನೀವು ಪ್ರಧಾನ ಮಂತ್ರಿ ಮುದ್ರಾ ಯೋಜನೆಯಡಿ ಶೂನ್ಯ ಗ್ಯಾರಂಟಿಯೊಂದಿಗೆ ಸಾಲ ಪಡೆಯಬಹುದು. ಸಾಲ ಪಡೆಯುವ ಮೊದಲು ಮಾಸಿಕ ಕಂತು (EMI) ನಿಮ್ಮ ಆದಾಯದ 30% ಮೀರದಂತೆ ನೋಡಿಕೊಳ್ಳಿ, ಇದು ಸುರಕ್ಷಿತ ಮಿತಿಯಾಗಿದೆ. ಹತ್ತಿರದ ರಾಷ್ಟ್ರೀಕೃತ ಬ್ಯಾಂಕ್‌ಗೆ ಭೇಟಿ ನೀಡಿ."
 
 User: "I want a tractor loan of 5 lakhs. Is it safe?"
-Assistant: "Tractor loans usually have interest rates between 10-14% for 3-5 years. It is safe only if the monthly EMI is within 30% of your farm income to ensure comfortable repayment. Check the processing fees at your bank before proceeding."`;
+Assistant: "Tractor loans usually have interest rates between 10-14% for 3-5 years. It is safe only if the monthly EMI is within 30% of your farm income to ensure comfortable repayment. Check the processing fees at your bank before proceeding."${financialCtx}`;
 
   const messages = [...(history || []).slice(-6), { role: 'user', content: userMessage }];
   const result = await callGemini(supabase, systemPrompt, userMessage, messages.slice(0, -1), 1000);

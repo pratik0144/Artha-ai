@@ -6,6 +6,7 @@
 import { getSupabase } from './_lib/supabase.js';
 import { initializeCredits } from './_lib/rate-limiter.js';
 import { GREETINGS } from './_lib/language-layer.js';
+import { buildFinancialSnapshot, generateProactiveNudges } from './_lib/relationship-manager.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -52,6 +53,20 @@ export default async function handler(req, res) {
       scheme_exp: data.scheme_exp || '',
     };
 
+    // ── AI Relationship Manager: build snapshot + proactive nudges ──
+    let rmNudges = [];
+    try {
+      const snapshot = await buildFinancialSnapshot(supabase, accountId);
+      if (snapshot) {
+        rmNudges = generateProactiveNudges(snapshot, language);
+        // Cache snapshot on profile so chat.js can reuse without re-querying
+        profile.financial_snapshot = snapshot;
+      }
+    } catch (rmError) {
+      // Non-fatal: RM layer failure should not block onboarding
+      console.error('[onboard] RM snapshot error (non-fatal):', rmError.message);
+    }
+
     // Upsert session
     const { error: upsertError } = await supabase.from('sessions').upsert({
       session_id: accountId,
@@ -80,6 +95,7 @@ export default async function handler(req, res) {
       greeting: GREETINGS[language] || GREETINGS.hi,
       active_agents: activeAgents,
       language_note: languageNote,
+      rm_nudges: rmNudges,
     });
   } catch (error) {
     console.error('[onboard] Error:', error);

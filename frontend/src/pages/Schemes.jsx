@@ -14,6 +14,16 @@ export const Schemes = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('recommended'); // recommended | all
 
+  const asText = (value) => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (Array.isArray(value)) return value.map(asText).filter(Boolean).join(', ');
+    if (typeof value === 'object') {
+      return value.name || value.title || value.benefits || value.description || JSON.stringify(value);
+    }
+    return String(value);
+  };
+
   useEffect(() => {
     const fetchSchemes = async () => {
       setLoading(true);
@@ -46,7 +56,7 @@ export const Schemes = () => {
     ? displaySchemes.filter(s =>
         s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+          s.tags?.some(t => asText(t).toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : displaySchemes;
 
@@ -83,7 +93,7 @@ export const Schemes = () => {
               return (
                 <Card key={name} className="border-l-4 border-l-primary flex flex-col">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-lg">{d.title}</h4>
+                    <h4 className="font-bold text-lg">{asText(d.title)}</h4>
                     <div className="flex items-center gap-1 text-xs font-bold text-primary bg-primary-container px-2 py-1 rounded-full">
                       <CheckCircle2 size={12} />
                       <span>{d.status}</span>
@@ -153,8 +163,8 @@ export const Schemes = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-2">
                       <div>
-                        <h4 className="font-bold text-base">{scheme.name}</h4>
-                        <p className="text-xs text-secondary mt-0.5">{scheme.ministry}</p>
+                        <h4 className="font-bold text-base">{asText(scheme.name)}</h4>
+                        <p className="text-xs text-secondary mt-0.5">{asText(scheme.ministry)}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {scheme.score && (
@@ -165,23 +175,23 @@ export const Schemes = () => {
                         {isExpanded ? <ChevronUp size={16} className="text-secondary" /> : <ChevronDown size={16} className="text-secondary" />}
                       </div>
                     </div>
-                    <p className="body-sm text-secondary mt-1">{scheme.benefits || scheme.description}</p>
+                    <p className="body-sm text-secondary mt-1">{asText(scheme.benefits || scheme.description)}</p>
                     {scheme.why_for_you && (
-                      <p className="text-xs text-primary mt-1 italic">💡 {scheme.why_for_you}</p>
+                      <p className="text-xs text-primary mt-1 italic">💡 {asText(scheme.why_for_you)}</p>
                     )}
                   </div>
                 </div>
 
                 {isExpanded && (
                   <div className="mt-4 pt-4 border-t border-outline-variant space-y-3 animate-fadeIn">
-                    <p className="body-sm text-secondary">{scheme.description}</p>
+                    <p className="body-sm text-secondary">{asText(scheme.description)}</p>
 
                     {scheme.documents_required?.length > 0 && (
                       <div>
                         <p className="text-xs font-bold text-secondary uppercase mb-1">Documents Required</p>
                         <div className="flex flex-wrap gap-1">
                           {scheme.documents_required.map((doc, i) => (
-                            <span key={i} className="text-xs bg-surface-container px-2 py-1 rounded-full">{doc}</span>
+                            <span key={i} className="text-xs bg-surface-container px-2 py-1 rounded-full">{asText(doc)}</span>
                           ))}
                         </div>
                       </div>
@@ -190,13 +200,13 @@ export const Schemes = () => {
                     {scheme.tags?.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {scheme.tags.map((tag, i) => (
-                          <span key={i} className="text-xs bg-primary-container text-primary px-2 py-0.5 rounded-full">#{tag}</span>
+                          <span key={i} className="text-xs bg-primary-container text-primary px-2 py-0.5 rounded-full">#{asText(tag)}</span>
                         ))}
                       </div>
                     )}
 
                     {scheme.how_to_apply && (
-                      <p className="text-xs text-secondary">📋 <strong>How to apply:</strong> {scheme.how_to_apply}</p>
+                      <p className="text-xs text-secondary">📋 <strong>How to apply:</strong> {asText(scheme.how_to_apply)}</p>
                     )}
 
                     {scheme.source_url && (

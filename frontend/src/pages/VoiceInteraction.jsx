@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mic, Square, X, Loader2, Volume2, VolumeX, Keyboard, Send } from 'lucide-react';
 import { useSession } from '../context/SessionContext';
 import { transcribeAudio } from '../api';
@@ -8,6 +8,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 export const VoiceInteraction = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile, sendMessage, latestFraudAlert, dismissFraudAlert } = useSession();
   const { speak, stop, isSpeaking, isSupported: ttsSupported } = useSpeechSynthesis();
   
@@ -43,6 +44,16 @@ export const VoiceInteraction = () => {
       textInputRef.current.focus();
     }
   }, [showTextInput]);
+
+  useEffect(() => {
+    if (location.state?.initialMessage) {
+      const msg = location.state.initialMessage;
+      // Clear location state
+      navigate(location.pathname, { replace: true, state: {} });
+      setTranscript(msg);
+      processMessage(msg);
+    }
+  }, [location.state]);
 
   const startRecording = async () => {
     try {

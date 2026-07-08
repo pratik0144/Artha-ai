@@ -11,6 +11,7 @@ import { classifyIntent } from './_lib/intent-classifier.js';
 import { dispatch } from './_lib/agents/dispatcher.js';
 import { getActiveKeyIndex, getKeyUsageStats } from './_lib/gemini-pool.js';
 import { executeAgenticTask } from './_lib/agent-registry.js';
+import { buildFinancialSnapshot, formatSnapshotForPrompt } from './_lib/relationship-manager.js';
 
 export default async function handler(req, res) {
   // CORS
@@ -101,8 +102,35 @@ export default async function handler(req, res) {
         eligible_schemes: profile.eligible_schemes || [],
       };
 
+      // 7b. Attach financial snapshot for cross-account context
+      // Use cached snapshot from onboarding if available, else compute fresh
+      let snapshot = profile.financial_snapshot || null;
+      if (!snapshot) {
+        try {
+          snapshot = await buildFinancialSnapshot(supabase, context.account_id);
+        } catch (e) {
+          console.error('[chat] RM snapshot error (non-fatal):', e.message);
+        }
+      }
+      if (snapshot) {
+        context.financial_snapshot = snapshot;
+        context.financial_context_text = formatSnapshotForPrompt(snapshot);
+      }
+
       // 8. Handle fraud / dispatch
       if (fraudCheck.is_fraud) {
+        // Log the auto-blocked scam attempt
+        try {
+          await supabase.from('fraud_logs').insert({
+            account_id: context.account_id || sessionId,
+            message: message.trim().slice(0, 500),
+            matched_patterns: fraudCheck.matched || [],
+            severity: fraudCheck.matched && fraudCheck.matched.length > 1 ? 'critical' : 'high',
+          });
+        } catch (logErr) {
+          console.warn('[chat-fraud-log] Failed to log automatic fraud detection:', logErr.message);
+        }
+
         agentResponse = {
           response: fraudCheck.warning,
           agent: 'fraud_guard_auto',

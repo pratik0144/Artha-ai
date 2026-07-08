@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onboardUser, sendChatMessage, resetSession } from '../api';
+import { onboardUser, sendChatMessage, resetSession, getFraudHistory } from '../api';
 
 const SessionContext = createContext();
 
@@ -109,7 +109,31 @@ export const SessionProvider = ({ children }) => {
   const [activeAgents, setActiveAgents] = useState([]);
   const [latestFraudAlert, setLatestFraudAlert] = useState(null);
   const [fraudHistory, setFraudHistory] = useState([]);
+  const [liveRiskLevel, setLiveRiskLevel] = useState('low');
   const [appLang, setAppLang] = useState('en'); // Holds the current selected language code
+
+  const asText = (value) => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (Array.isArray(value)) return value.map(asText).filter(Boolean).join(', ');
+    if (typeof value === 'object') {
+      return value.name || value.title || value.benefits || value.description || JSON.stringify(value);
+    }
+    return String(value);
+  };
+
+  const fetchFraudHistory = async (accountId) => {
+    try {
+      const result = await getFraudHistory(accountId);
+      if (result && result.status === 'success') {
+        setFraudHistory(result.alerts);
+        setLiveRiskLevel(result.risk_level);
+        return result;
+      }
+    } catch (error) {
+      console.error("Failed to fetch fraud history", error);
+    }
+  };
 
   // App initialization
   const initializeApp = async (lang = 'en', accountId = 'JD-1001') => {
@@ -124,10 +148,24 @@ export const SessionProvider = ({ children }) => {
         setIsInitialized(true);
         setAppLang(lang);
 
-        // Add initial greeting to history
-        setHistory([
+        // Fetch real-time live fraud history
+        await fetchFraudHistory(accountId);
+
+        // Add initial greeting to history, followed by RM nudges (if any)
+        const initialHistory = [
           { role: 'assistant', content: result.greeting, agent: 'greeting' }
-        ]);
+        ];
+        // Inject proactive nudges from the AI Relationship Manager
+        if (result.rm_nudges && result.rm_nudges.length > 0) {
+          for (const nudge of result.rm_nudges) {
+            initialHistory.push({
+              role: 'assistant',
+              content: nudge,
+              agent: 'relationship-manager'
+            });
+          }
+        }
+        setHistory(initialHistory);
         return true;
       }
     } catch (error) {
@@ -147,11 +185,13 @@ export const SessionProvider = ({ children }) => {
     setProfile(null);
     setHistory([]);
     setFraudHistory([]);
+    setLiveRiskLevel('low');
     setIsInitialized(false);
   };
 
   useEffect(() => {
     // Auto-login the default tester
+
     initializeApp('en', 'JD-1001');
   }, []);
 
@@ -208,13 +248,13 @@ export const SessionProvider = ({ children }) => {
             timestamp: new Date().toISOString()
           };
           setLatestFraudAlert(alertData);
-          setFraudHistory(prev => [alertData, ...prev]);
+          await fetchFraudHistory(profile.account_id);
         }
 
         // Add assistant response
         const asstMsg = {
           role: 'assistant',
-          content: result.response,
+          content: asText(result.response),
           agent: result.agent_used,
           model: result.model_used,
           intent: result.intent_detected,
@@ -222,7 +262,10 @@ export const SessionProvider = ({ children }) => {
         };
 
         setHistory(prev => [...prev, asstMsg]);
-        return result;
+        return {
+          ...result,
+          response: asText(result.response),
+        };
       }
     } catch (error) {
       console.error("Error sending message", error);
@@ -263,6 +306,8 @@ export const SessionProvider = ({ children }) => {
       latestFraudAlert,
       appLang,
       fraudHistory,
+      liveRiskLevel,
+      fetchFraudHistory,
       t, // Provide the translated dictionary directly to components
       changeLanguage,
       sendMessage,

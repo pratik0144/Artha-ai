@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { BookOpen, ShieldCheck, TrendingUp, PlayCircle, X, Volume2, Square } from 'lucide-react';
+import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 const LITERACY_CONTENT = [
   {
@@ -310,9 +311,11 @@ export const Education = () => {
   const [speechChunks, setSpeechChunks] = useState([]);
   const [currentChunk, setCurrentChunk] = useState(0);
 
+  const { speak, stop } = useSpeechSynthesis();
+
   // Cleanup speech on unmount
   useEffect(() => {
-    return () => { window.speechSynthesis?.cancel(); };
+    return () => { stop(); };
   }, []);
 
   // Stop playing when card changes
@@ -321,7 +324,7 @@ export const Education = () => {
   }, [expandedTopic]);
 
   const stopSpeech = () => {
-    window.speechSynthesis?.cancel();
+    stop();
     setPlayingTopicId(null);
     setSpeechChunks([]);
     setCurrentChunk(0);
@@ -352,33 +355,22 @@ export const Education = () => {
   const speakChunk = (chunks, idx, topicId) => {
     if (idx >= chunks.length) { stopSpeech(); return; }
 
-    const u = new SpeechSynthesisUtterance(chunks[idx]);
-    u.lang = playLang;
-    u.rate = 0.95;
-
-    const voices = window.speechSynthesis.getVoices();
-    const prefix = playLang.split('-')[0];
-    const voice = voices.find(v => v.lang === playLang)
-      || voices.find(v => v.lang.startsWith(prefix));
-    if (voice) u.voice = voice;
-
-    u.onend = () => {
-      const next = idx + 1;
-      setCurrentChunk(next);
-      speakChunk(chunks, next, topicId);
-    };
-    u.onerror = () => stopSpeech();
-
-    window.speechSynthesis.speak(u);
+    const shortLang = playLang.split('-')[0]; // convert 'en-IN' to 'en'
+    speak(chunks[idx], shortLang, {
+      rate: 1.0,
+      onEnd: () => {
+        const next = idx + 1;
+        setCurrentChunk(next);
+        speakChunk(chunks, next, topicId);
+      }
+    });
   };
 
   const handleSpeak = (e, text, topicId) => {
     e.stopPropagation();
-    if (!('speechSynthesis' in window)) return;
-
     if (playingTopicId === topicId) { stopSpeech(); return; }
 
-    window.speechSynthesis.cancel();
+    stop();
     const chunks = splitIntoChunks(text);
     setSpeechChunks(chunks);
     setCurrentChunk(0);

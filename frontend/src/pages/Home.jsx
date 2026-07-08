@@ -25,6 +25,16 @@ export const Home = () => {
   const [eligibleSchemes, setEligibleSchemes] = useState([]);
   const [budgetInput, setBudgetInput] = useState('');
 
+  const asText = (value) => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (Array.isArray(value)) return value.map(asText).filter(Boolean).join(', ');
+    if (typeof value === 'object') {
+      return value.name || value.title || value.benefits || value.description || JSON.stringify(value);
+    }
+    return String(value);
+  };
+
   // --- Fetch live data on mount ---
   useEffect(() => {
     if (!profile?.account_id) return;
@@ -176,11 +186,11 @@ export const Home = () => {
             {eligibleSchemes.slice(0, 3).map((scheme, i) => (
               <div key={i} className="flex items-center justify-between bg-primary-container/30 rounded-lg p-3">
                 <div className="flex-1">
-                  <p className="font-semibold text-sm">{scheme.name}</p>
-                  <p className="text-xs text-secondary">{scheme.benefit_amount}</p>
+                  <p className="font-semibold text-sm">{asText(scheme.name)}</p>
+                  <p className="text-xs text-secondary">{asText(scheme.benefit_amount)}</p>
                 </div>
                 <button
-                  onClick={() => sendMessage(`Tell me about ${scheme.name}`)}
+                  onClick={() => sendMessage(`Tell me about ${asText(scheme.name)}`)}
                   className="text-xs bg-primary text-on-primary px-3 py-1.5 rounded-full font-semibold hover:opacity-90 transition-opacity"
                 >
                   Ask AI
@@ -476,11 +486,11 @@ export const Home = () => {
               <p className="font-semibold mb-1">{t.learnUpi}</p>
               <p className="text-xs text-secondary">{t.quickTutorial}</p>
             </button>
-            <button onClick={() => sendMessage(appLang === 'hi' ? "मुझे पैसे ट्रांसफर करने हैं" : appLang === 'kn' ? "ನಾನು ಹಣವನ್ನು ವರ್ಗಾಯಿಸಲು ಬಯಸುತ್ತೇನೆ" : "I want to transfer money")} className="p-4 bg-surface-container-low rounded-md text-left hover:bg-surface-container transition-colors flex flex-col justify-between">
+            <button onClick={() => navigate('/voice', { state: { initialMessage: appLang === 'hi' ? "मुझे पैसे ट्रांसफर करने हैं" : appLang === 'kn' ? "ನಾನು ಹಣವನ್ನು ವರ್ಗಾಯಿಸಲು ಬಯಸುತ್ತೇನೆ" : "I want to transfer money" } })} className="p-4 bg-surface-container-low rounded-md text-left hover:bg-surface-container transition-colors flex flex-col justify-between">
               <p className="font-semibold mb-1">{appLang === 'hi' ? "पैसे भेजें" : appLang === 'kn' ? "ಹಣ ವರ್ಗಾವಣೆ" : "Transfer Money"}</p>
               <ArrowRight size={16} className="text-primary self-end" />
             </button>
-            <button onClick={() => sendMessage(appLang === 'hi' ? "मुझे बिल का भुगतान करना है" : appLang === 'kn' ? "ನಾನು ಬಿಲ್ ಪಾವತಿಸಬೇಕು" : "I want to pay a bill")} className="p-4 bg-surface-container-low rounded-md text-left hover:bg-surface-container transition-colors flex flex-col justify-between">
+            <button onClick={() => navigate('/voice', { state: { initialMessage: appLang === 'hi' ? "मुझे बिल का भुगतान करना है" : appLang === 'kn' ? "ನಾನು ಬಿಲ್ ಪಾವತಿಸಬೇಕು" : "I want to pay a bill" } })} className="p-4 bg-surface-container-low rounded-md text-left hover:bg-surface-container transition-colors flex flex-col justify-between">
               <p className="font-semibold mb-1">{t.payBill}</p>
               <ArrowRight size={16} className="text-primary self-end" />
             </button>

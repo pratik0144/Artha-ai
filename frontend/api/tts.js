@@ -12,6 +12,8 @@
  */
 
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
+import { getSupabase } from './_lib/supabase.js';
+import { callGemini } from './_lib/gemini-pool.js';
 
 // Voice map: language code → Edge neural voice name
 const VOICE_MAP = {
@@ -19,6 +21,17 @@ const VOICE_MAP = {
   hi: 'hi-IN-SwaraNeural',
   kn: 'kn-IN-SapnaNeural',
 };
+
+// Check if the text already contains Hindi/Kannada characters
+function hasIndicScript(text) {
+  for (const char of text) {
+    const cp = char.codePointAt(0);
+    if ((cp >= 0x0900 && cp <= 0x097f) || (cp >= 0x0c80 && cp <= 0x0cff)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -41,8 +54,27 @@ export default async function handler(req, res) {
     }
 
     // Cap text length to prevent abuse (max ~500 chars per request)
-    const cleanText = text.slice(0, 500).trim();
+    let cleanText = text.slice(0, 500).trim();
     const voiceName = VOICE_MAP[lang] || VOICE_MAP.en;
+
+    // Translate English text to Hindi/Kannada if requested lang is hi/kn
+    if ((lang === 'hi' || lang === 'kn') && !hasIndicScript(cleanText)) {
+      try {
+        const supabase = getSupabase();
+        const targetLangLabel = lang === 'hi' ? 'Hindi (Devanagari script)' : 'Kannada (Kannada script)';
+        const systemPrompt = `You are a professional financial translator translating text for Indian rural users.
+Translate the user's text into simple, easy-to-understand ${targetLangLabel}.
+Translate numbers and proper nouns to match the spoken language (e.g. read out '₹' as 'रुपये' or 'ರೂಪಾಯಿ'). Keep it natural to be read aloud.
+Return ONLY the translated text, do not include any notes, explanations, or quotes.`;
+        
+        const translationResult = await callGemini(supabase, systemPrompt, cleanText, [], 1000);
+        if (translationResult && translationResult.text) {
+          cleanText = translationResult.text.trim();
+        }
+      } catch (transError) {
+        console.warn('[tts] Dynamic translation failed, using fallback:', transError.message);
+      }
+    }
 
     const tts = new MsEdgeTTS();
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
