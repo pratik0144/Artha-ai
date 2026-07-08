@@ -41,13 +41,13 @@ export const Home = () => {
     const id = profile.account_id;
 
     // Installments
-    fetch(`/api/installments?account_id=${id}`)
+    fetch(`/api/account-products?type=installments&account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setInstallments(d.installments); })
       .catch(() => { });
 
     // Loans
-    fetch(`/api/loans?account_id=${id}`)
+    fetch(`/api/account-products?type=loans&account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setLoans(d.loans); })
       .catch(() => { });
@@ -59,13 +59,13 @@ export const Home = () => {
       .catch(() => { });
 
     // Fixed Deposits
-    fetch(`/api/fixed_deposits?account_id=${id}`)
+    fetch(`/api/account-products?type=fixed_deposits&account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setFixedDeposits(d.fixed_deposits || []); })
       .catch(() => { });
 
     // Eligible schemes (not-yet-enrolled)
-    fetch(`/api/eligible_schemes?account_id=${id}`)
+    fetch(`/api/schemes?type=eligible&account_id=${id}`)
       .then(r => r.json())
       .then(d => { if (d.status === 'success') setEligibleSchemes(d.eligible_schemes || []); })
       .catch(() => { });
@@ -83,7 +83,7 @@ export const Home = () => {
     const val = parseFloat(budgetInput);
     if (isNaN(val) || val <= 0) return;
     try {
-      const res = await fetch(`/api/spending/limit`, {
+      const res = await fetch(`/api/spending`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ account_id: profile.account_id, limit: val }),

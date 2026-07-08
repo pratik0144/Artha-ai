@@ -43,7 +43,7 @@ export const Sidebar = () => {
     if (!profile?.account_id) return;
     const fetchScore = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/health-score?account_id=${profile.account_id}`);
+        const res = await fetch(`${API_BASE}/api/status?type=health-score&account_id=${profile.account_id}`);
         const data = await res.json();
         if (data.status === 'success') setHealthScore(data);
       } catch { /* non-critical */ }

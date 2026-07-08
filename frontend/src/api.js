@@ -58,7 +58,7 @@ apiClient.interceptors.request.use((config) => {
 
 export const checkHealth = async () => {
   try {
-    const response = await apiClient.get('/api/health');
+    const response = await apiClient.get('/api/status?type=health');
     return response.data;
   } catch (error) {
     console.error('Health check failed:', error);
@@ -144,8 +144,8 @@ export const transcribeAudio = async (audioBlob, hintLanguage = null) => {
 
 export const getCredits = async (sessionId) => {
   try {
-    const params = sessionId ? { session_id: sessionId } : {};
-    const response = await apiClient.get('/api/credits', { params });
+    const params = sessionId ? { session_id: sessionId, type: 'credits' } : { type: 'credits' };
+    const response = await apiClient.get('/api/status', { params });
     return response.data;
   } catch (error) {
     console.error('Get credits failed:', error);
@@ -155,7 +155,7 @@ export const getCredits = async (sessionId) => {
 
 export const getAllSchemes = async () => {
   try {
-    const response = await apiClient.get('/api/schemes/all');
+    const response = await apiClient.get('/api/schemes?type=all');
     dispatchCreditUpdate(response.data);
     return response.data;
   } catch (error) {
@@ -166,7 +166,7 @@ export const getAllSchemes = async () => {
 
 export const recommendSchemes = async (profileData) => {
   try {
-    const response = await apiClient.post('/api/schemes/recommend', profileData);
+    const response = await apiClient.post('/api/schemes', profileData);
     dispatchCreditUpdate(response.data);
     return response.data;
   } catch (error) {
@@ -177,7 +177,7 @@ export const recommendSchemes = async (profileData) => {
 
 export const getFraudHistory = async (accountId) => {
   try {
-    const response = await apiClient.get('/api/fraud-history', {
+    const response = await apiClient.get('/api/fraud', {
       params: { account_id: accountId }
     });
     dispatchCreditUpdate(response.data);
@@ -190,7 +190,7 @@ export const getFraudHistory = async (accountId) => {
 
 export const submitFraudReport = async (accountId, contactInfo, details) => {
   try {
-    const response = await apiClient.post('/api/fraud-report', {
+    const response = await apiClient.post('/api/fraud', {
       account_id: accountId,
       contact_info: contactInfo,
       details: details
