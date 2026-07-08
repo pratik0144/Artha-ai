@@ -6,7 +6,7 @@ import { CheckCircle2, FileText, IndianRupee, Search, ChevronDown, ChevronUp, Ex
 import { getAllSchemes, recommendSchemes } from '../api';
 
 export const Schemes = () => {
-  const { schemes: activeSchemes, profile } = useSession();
+  const { schemes: activeSchemes, profile, appLang } = useSession();
   const [recommended, setRecommended] = useState([]);
   const [allSchemes, setAllSchemes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,6 +66,10 @@ export const Schemes = () => {
     "PM-KISAN": { title: "PM-KISAN Samman Nidhi", desc: "₹6000/year income support for landholding farmers.", status: "Active", amount: "₹2,000 Next Installment" },
     "MGNREGA": { title: "MGNREGA", desc: "100 days of guaranteed wage employment.", status: "Active", amount: "₹267/day" },
     "PMJDY": { title: "Jan Dhan Yojana", desc: "Zero balance bank account with insurance.", status: "Active", amount: "₹10,000 overdraft" },
+    "PM-Kisan": { title: "PM-KISAN Samman Nidhi", desc: "₹6000/year income support for landholding farmers.", status: "Active", amount: "₹2,000 Next Installment" },
+    "Pradhan Mantri Jan Dhan Yojana": { title: "Jan Dhan Yojana", desc: "Zero balance bank account with insurance.", status: "Active", amount: "₹10,000 overdraft" },
+    "PM Ujjwala Yojana": { title: "PM Ujjwala Yojana", desc: "Free LPG connection for BPL households.", status: "Active", amount: "Free LPG connection" },
+    "PM Fasal Bima Yojana": { title: "PM Fasal Bima Yojana", desc: "Crop insurance support against damage.", status: "Active", amount: "Crop Insurance Cover" },
   };
 
   const severityColor = (score) => {
@@ -88,22 +92,40 @@ export const Schemes = () => {
         <>
           <h3 className="label text-secondary uppercase mb-4">Your Active Schemes</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            {activeList.map((name) => {
-              const d = schemeDetailMap[name] || { title: name, desc: "Government Scheme", status: "Active", amount: "-" };
+            {activeList.map((item, index) => {
+              const name = typeof item === 'string' ? item : (item.name || item.scheme_name || '');
+              const d = schemeDetailMap[name] || schemeDetailMap[item] || {};
+
+              const title = d.title || name || "Government Scheme";
+              
+              let desc = d.desc || "Active government scheme benefits.";
+              if (!d.desc && typeof item === 'object') {
+                desc = (appLang === 'hi' ? item.description_hindi : appLang === 'kn' ? item.description_kannada : null)
+                  || item.description
+                  || "Active government scheme benefits.";
+              }
+
+              const status = d.status || "Active";
+              const amount = d.amount && d.amount !== "-" 
+                ? d.amount 
+                : (typeof item === 'object' ? (item.benefit_amount || item.frequency || "Enrolled") : "Enrolled");
+
+              const key = name || `active-scheme-${index}`;
+
               return (
-                <Card key={name} className="border-l-4 border-l-primary flex flex-col">
+                <Card key={key} className="border-l-4 border-l-primary flex flex-col">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-lg">{asText(d.title)}</h4>
+                    <h4 className="font-bold text-lg">{asText(title)}</h4>
                     <div className="flex items-center gap-1 text-xs font-bold text-primary bg-primary-container px-2 py-1 rounded-full">
                       <CheckCircle2 size={12} />
-                      <span>{d.status}</span>
+                      <span>{status}</span>
                     </div>
                   </div>
-                  <p className="body-sm text-secondary mb-4 flex-1">{d.desc}</p>
+                  <p className="body-sm text-secondary mb-4 flex-1">{desc}</p>
                   <div className="bg-surface-container p-3 rounded-md flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <IndianRupee size={16} className="text-primary" />
-                      <span className="font-semibold">{d.amount}</span>
+                      <span className="font-semibold">{amount}</span>
                     </div>
                   </div>
                 </Card>
