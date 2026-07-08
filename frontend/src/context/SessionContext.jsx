@@ -33,7 +33,7 @@ export const UI_DICT = {
     quickChat: "Quick Chat",
     typeQuestion: "Type your question...",
     recentInsights: "Recent Insights",
-    noInsights: "Ask Artha AI a question to see insights here.",
+    noInsights: "Ask Artha Mitra a question to see insights here.",
     quickActions: "Quick Actions",
     checkBalance: "Check Balance",
     viewAccounts: "View accounts",
@@ -43,7 +43,7 @@ export const UI_DICT = {
     quickTutorial: "Quick tutorial",
     payBill: "Pay Bill",
     networkError: "Sorry, I am having trouble connecting right now. Please try again.",
-    offlineMode: "Hello! Artha AI is running in offline mode. Please start the backend.",
+    offlineMode: "Hello! Artha Mitra is running in offline mode. Please start the backend.",
     greeting: "Session cleared. How can I help you?",
   },
   hi: {
@@ -59,7 +59,7 @@ export const UI_DICT = {
     quickChat: "Quick Chat",
     typeQuestion: "Apna sawal likhein...",
     recentInsights: "Taza Jaankari",
-    noInsights: "Artha AI se sawal puchein aur yahan jankari dekhein.",
+    noInsights: "Artha Mitra se sawal puchein aur yahan jankari dekhein.",
     quickActions: "Quick Actions",
     checkBalance: "Balance Check Karein",
     viewAccounts: "Accounts dekhein",
@@ -69,7 +69,7 @@ export const UI_DICT = {
     quickTutorial: "Quick tutorial",
     payBill: "Bill Bharein",
     networkError: "माफ़ करें, अभी नेटवर्क में समस्या है। कृपया फिर से कोशिश करें।",
-    offlineMode: "नमस्ते! Artha AI is running in offline mode. Please start the backend.",
+    offlineMode: "नमस्ते! Artha Mitra is running in offline mode. Please start the backend.",
     greeting: "Session clear ho gaya. Main aapki kaise madad kar sakta hoon?",
   },
   kn: {
@@ -85,7 +85,7 @@ export const UI_DICT = {
     quickChat: "ತ್ವರಿತ ಚಾಟ್",
     typeQuestion: "ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ...",
     recentInsights: "ಇತ್ತೀಚಿನ ಒಳನೋಟಗಳು",
-    noInsights: "ಒಳನೋಟಗಳನ್ನು ನೋಡಲು Artha AI ಅನ್ನು ಪ್ರಶ್ನೆ ಕೇಳಿ.",
+    noInsights: "ಒಳನೋಟಗಳನ್ನು ನೋಡಲು Artha Mitra ಅನ್ನು ಪ್ರಶ್ನೆ ಕೇಳಿ.",
     quickActions: "ತ್ವರಿತ ಕ್ರಿಯೆಗಳು",
     checkBalance: "ಬ್ಯಾಲೆನ್ಸ್ ಪರಿಶೀಲಿಸಿ",
     viewAccounts: "ಖಾತೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
@@ -95,7 +95,7 @@ export const UI_DICT = {
     quickTutorial: "ತ್ವರಿತ ಟ್ಯುಟೋರಿಯಲ್",
     payBill: "ಬಿಲ್ ಪಾವತಿಸಿ",
     networkError: "ಕ್ಷಮಿಸಿ, ಈಗ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಸಮಸ್ಯೆಯಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
-    offlineMode: "ನಮಸ್ಕಾರ! Artha AI ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದೆ.",
+    offlineMode: "ನಮಸ್ಕಾರ! Artha Mitra ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದೆ.",
     greeting: "ಸೆಶನ್ ತೆರವುಗೊಳಿಸಲಾಗಿದೆ. ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?",
   }
 };

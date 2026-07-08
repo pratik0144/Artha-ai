@@ -171,6 +171,58 @@ async function analyzeUserBudget(supabase, accountId, lang) {
 
   const breakdownStr = formatCategoriesBreakdown(categoryTotals, isHi, isKn);
 
+  // ── Month-End Projection (B4) ─────────────────────────────────
+  // Calculate: (spend_so_far / days_elapsed) × days_in_month per category
+  const dayOfMonth = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysRemaining = daysInMonth - dayOfMonth;
+
+  const projections = {};
+  let totalProjected = 0;
+  if (dayOfMonth >= 2 && spent > 0) { // Need at least 2 days of data
+    for (const [cat, amt] of Object.entries(categoryTotals)) {
+      if (amt > 0) {
+        const projected = Math.round((amt / dayOfMonth) * daysInMonth);
+        projections[cat] = projected;
+        totalProjected += projected;
+      }
+    }
+  }
+
+  const projectionLabels = {
+    agriculture: isHi ? 'खेती' : isKn ? 'ಕೃಷಿ' : 'Agriculture',
+    utilities: isHi ? 'बिजली/मोबाइल' : isKn ? 'ವಿದ್ಯುತ್/ಮೊಬೈಲ್' : 'Utilities',
+    household: isHi ? 'राशन/घर' : isKn ? 'ರೇಷನ್/ಮನೆ' : 'Household',
+    healthcare: isHi ? 'दवा/इलाज' : isKn ? 'ವೈದ್ಯಕೀಯ' : 'Healthcare',
+    education: isHi ? 'पढ़ाई' : isKn ? 'ಶಿಕ್ಷಣ' : 'Education',
+    business: isHi ? 'व्यापार' : isKn ? 'ವ್ಯಾಪಾರ' : 'Business',
+    other: isHi ? 'अन्य' : isKn ? 'ಇತರೇ' : 'Others',
+  };
+
+  function buildProjectionStr() {
+    if (Object.keys(projections).length === 0) return '';
+    const lines = Object.entries(projections)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4) // Top 4 categories only
+      .map(([cat, amt]) => `  - ${projectionLabels[cat] || cat}: ~₹${formatINR(amt)}`);
+
+    if (isHi) {
+      return `\n\n🔮 **महीने के अंत तक अनुमानित खर्च (Projection)**:\n` +
+             `* कुल अनुमानित: ~₹${formatINR(totalProjected)} (${daysRemaining} दिन शेष)\n` +
+             lines.join('\n');
+    }
+    if (isKn) {
+      return `\n\n🔮 **ತಿಂಗಳ ಕೊನೆಯ ವೆಚ್ಚದ ಅಂದಾಜು (Projection)**:\n` +
+             `* ಒಟ್ಟು ಅಂದಾಜು: ~₹${formatINR(totalProjected)} (${daysRemaining} ದಿನಗಳು ಉಳಿದಿದೆ)\n` +
+             lines.join('\n');
+    }
+    return `\n\n🔮 **Month-End Spending Projection**:\n` +
+           `* Total projected: ~₹${formatINR(totalProjected)} (${daysRemaining} days remaining)\n` +
+           lines.join('\n');
+  }
+
+  const projectionStr = buildProjectionStr();
+
   // Generate a customized response based on their current balance and spending
   if (isHi) {
     let advice = `📊 **बजट विश्लेषण (इस महीने)**:\n` +
@@ -180,8 +232,12 @@ async function analyzeUserBudget(supabase, accountId, lang) {
                  `* मासिक सीमा: ₹${formatINR(limit)}\n\n` +
                  `📋 **श्रेणी के अनुसार खर्च (Spending Breakdown)**:\n${breakdownStr}`;
 
+    advice += projectionStr;
+
     if (limitReached) {
       advice += `\n\n⚠️ **सावधान!** आपका इस महीने का खर्च आपकी सेट की गई सीमा ₹${formatINR(limit)} से अधिक हो चुका है। कृपया केवल आवश्यक चीजों पर ही खर्च करें।`;
+    } else if (totalProjected > limit && totalProjected > 0) {
+      advice += `\n\n⚠️ **चेतावनी:** इस गति से आपका अनुमानित खर्च ₹${formatINR(totalProjected)} होगा जो आपकी सीमा ₹${formatINR(limit)} से अधिक है।`;
     } else if (spent > limit * 0.8) {
       advice += `\n\n💡 **सलाह:** आप अपने मासिक बजट के 80% भाग को खर्च कर चुके हैं। शेष दिनों के लिए अपने खर्च को नियंत्रित करें।`;
     } else {
@@ -198,8 +254,12 @@ async function analyzeUserBudget(supabase, accountId, lang) {
                  `* ಮಾಸಿಕ ಮಿತಿ: ₹${formatINR(limit)}\n\n` +
                  `📋 **ವರ್ಗದ ಪ್ರಕಾರ ವೆಚ್ಚದ ವಿವರಗಳು (Spending Breakdown)**:\n${breakdownStr}`;
 
+    advice += projectionStr;
+
     if (limitReached) {
       advice += `\n\n⚠️ **ಎಚ್ಚರಿಕೆ!** ನಿಮ್ಮ ಖರ್ಚು ಈಗಾಗಲೇ ನಿಮ್ಮ ಮಾಸಿಕ ಮಿತಿ ₹${formatINR(limit)} ದಾಟಿದೆ. ದಯವಿಟ್ಟು ಅನಗತ್ಯ ವೆಚ್ಚಗಳನ್ನು ನಿಯಂತ್ರಿಸಿ.`;
+    } else if (totalProjected > limit && totalProjected > 0) {
+      advice += `\n\n⚠️ **ಎಚ್ಚರಿಕೆ:** ಈ ವೇಗದಲ್ಲಿ ನಿಮ್ಮ ಅಂದಾಜು ಖರ್ಚು ₹${formatINR(totalProjected)} ಆಗುತ್ತದೆ ಅದು ನಿಮ್ಮ ಮಿತಿ ₹${formatINR(limit)} ದಾಟುತ್ತದೆ.`;
     } else if (spent > limit * 0.8) {
       advice += `\n\n💡 **ಸಲಹೆ:** ನಿಮ್ಮ ಮಾಸಿಕ ಬಜೆಟ್‌ನ 80% ಖರ್ಚಾಗಿದೆ. ಉಳಿದ ದಿನಗಳಲ್ಲಿ ಖರ್ಚು ನಿಯಂತ್ರಿಸಿ.`;
     } else {
@@ -215,8 +275,12 @@ async function analyzeUserBudget(supabase, accountId, lang) {
                `* Configured Limit: ₹${formatINR(limit)}\n\n` +
                `📋 **Spending Breakdown**:\n${breakdownStr}`;
 
+  advice += projectionStr;
+
   if (limitReached) {
     advice += `\n\n⚠️ **Alert!** You have exceeded your configured limit of ₹${formatINR(limit)}. Avoid non-essential expenses for the rest of the month.`;
+  } else if (totalProjected > limit && totalProjected > 0) {
+    advice += `\n\n⚠️ **Warning:** At this rate, your projected spending of ₹${formatINR(totalProjected)} will exceed your limit of ₹${formatINR(limit)} by month end.`;
   } else if (spent > limit * 0.8) {
     advice += `\n\n💡 **Tip:** You have consumed 80% of your monthly limit. Keep your spending under control.`;
   } else {

@@ -1,11 +1,13 @@
-# Artha AI
+# Artha Mitra
+
+> *Artha Mitra — envisioned as the next generation of IDBI Intech's i-Mobot: voice-first, multilingual, and proactive, extending conversational banking beyond WhatsApp to any channel, including offline USSD.*
 
 > [!NOTE]
 > This project's production system (v2.0+) runs entirely on Vercel serverless functions (`frontend/api/`) + Supabase + Google Gemini. An earlier Python/Flask prototype is preserved in `legacy/flask-backend-v1/` for reference only and is not used by the deployed app. See CHANGELOG.md for the migration history.
 
-Artha AI is a multilingual, voice-first financial accessibility platform designed for rural and low-digital-literacy users in India. The system allows users to interact naturally in their native languages to perform tasks like checking bank balances, tracking transactions, discovering government schemes, and receiving fraud/scam protection.
+Artha Mitra is a multilingual, voice-first financial accessibility platform designed for rural and low-digital-literacy users in India. The system allows users to interact naturally in their native languages to perform tasks like checking bank balances, tracking transactions, discovering government schemes, and receiving fraud/scam protection.
 
-Instead of a basic chatbot, Artha AI operates as an intelligent **AI Operating System**, coordinating multiple specialized AI agents to execute real financial workflows securely, paired with a beautiful, mobile-first responsive frontend built on the Stitch Design System.
+Instead of a basic chatbot, Artha Mitra operates as an intelligent **AI Operating System**, coordinating multiple specialized AI agents to execute real financial workflows securely, paired with a beautiful, mobile-first responsive frontend built on the Stitch Design System.
 
 ---
 

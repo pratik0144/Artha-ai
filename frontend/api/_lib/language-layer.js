@@ -369,7 +369,7 @@ export function checkFraudLanguage(text, lang = 'hi', options = {}) {
   const result = { is_fraud: isFraud, matched, warning };
 
   if (requestRisk) {
-    let risk_score = 'LOW';
+    let risk_score = 'low';
     let velocity_recommendation = 'Allow normal transactions';
 
     if (isFraud) {
@@ -381,13 +381,13 @@ export function checkFraudLanguage(text, lang = 'hi', options = {}) {
       });
 
       if (matched.length >= 3 || hasCriticalKeyword) {
-        risk_score = 'CRITICAL';
+        risk_score = 'critical';
         velocity_recommendation = 'Block all transactions immediately. Suspend UPI and net banking transfers.';
       } else if (matched.length === 2) {
-        risk_score = 'HIGH';
+        risk_score = 'high';
         velocity_recommendation = `Limit transaction velocity to 1 transaction per 24 hours. Hold transactions above ₹${formatINR(5000)}.`;
       } else {
-        risk_score = 'MEDIUM';
+        risk_score = 'medium';
         velocity_recommendation = `Limit transaction velocity to 1 transaction per hour, maximum ₹${formatINR(10000)} per transaction.`;
       }
     }
@@ -402,16 +402,16 @@ export function checkFraudLanguage(text, lang = 'hi', options = {}) {
 // ── 5. GREETINGS ───────────────────────────────────────────────
 
 export const GREETINGS = {
-  hi: '🙏 नमस्ते! मैं Artha AI हूँ। आपकी कैसे मदद कर सकता हूँ?',
-  kn: '🙏 ನಮಸ್ಕಾರ! ನಾನು Artha AI. ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
-  ta: '🙏 வணக்கம்! நான் Artha AI. நான் உங்களுக்கு எப்படி உதவ முடியும்?',
-  te: '🙏 నమస్కారం! నేను Artha AI. మీకు ఎలా సహాయం చేయగలను?',
-  bn: '🙏 নমস্কার! আমি Artha AI। আমি আপনাকে কিভাবে সাহায্য করতে পারি?',
-  mr: '🙏 नमस्कार! मी Artha AI आहे. मी तुम्हाला कशी मदत करू शकतो?',
-  or: '🙏 ନମସ୍କାର! ମୁଁ Artha AI। ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?',
-  pa: '🙏 ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ Artha AI ਹਾਂ। ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?',
-  gu: '🙏 નમસ્તે! હું Artha AI છું. હું તમને કેવી રીતે મદદ કરી શકું?',
-  en: '🙏 Hello! I am Artha AI. How can I help you today?',
+  hi: '🙏 नमस्ते! मैं Artha Mitra हूँ। आपकी कैसे मदद कर सकता हूँ?',
+  kn: '🙏 ನಮಸ್ಕಾರ! ನಾನು Artha Mitra. ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
+  ta: '🙏 வணக்கம்! நான் Artha Mitra. நான் உங்களுக்கு எப்படி உதவ முடியும்?',
+  te: '🙏 నమస్కారం! నేను Artha Mitra. మీకు ఎలా సహాయం చేయగలను?',
+  bn: '🙏 নমস্কার! আমি Artha Mitra। আমি আপনাকে কিভাবে সাহায্য করতে পারি?',
+  mr: '🙏 नमस्कार! मी Artha Mitra आहे. मी तुम्हाला कशी मदत करू शकतो?',
+  or: '🙏 ନମସ୍କାର! ମୁଁ Artha Mitra। ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?',
+  pa: '🙏 ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ Artha Mitra ਹਾਂ। ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?',
+  gu: '🙏 નમસ્તે! હું Artha Mitra છું. હું તમને કેવી રીતે મદદ કરી શકું?',
+  en: '🙏 Hello! I am Artha Mitra. How can I help you today?',
 };
 
 /**

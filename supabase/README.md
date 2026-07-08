@@ -1,6 +1,6 @@
-# Artha AI (DigiSeva) — Supabase Database Setup
+# Artha Mitra (DigiSeva) — Supabase Database Setup
 
-This directory contains the complete PostgreSQL database schema and seed data for running Artha AI on [Supabase](https://supabase.com).
+This directory contains the complete PostgreSQL database schema and seed data for running Artha Mitra on [Supabase](https://supabase.com).
 
 ## Files
 

@@ -18,9 +18,9 @@ const LOCAL_QA = [
     id: 'greeting_hello',
     match: [/hello/i, /hi/i, /hey/i, /namaste/i, /namaskar/i, /नमस्ते/i, /नमस्कार/i, /ನಮಸ್ಕಾರ/i],
     response: {
-      en: "🙏 Hello! I am Artha AI, your financial assistant. How can I help you today? I can check your balance, pay bills, explain government schemes, or teach financial safety.",
-      hi: "🙏 नमस्ते! मैं Artha AI हूँ, आपका वित्तीय सहायक। आज मैं आपकी क्या मदद कर सकता हूँ? मैं आपका बैलेंस चेक कर सकता हूँ, बिलों का भुगतान कर सकता हूँ, सरकारी योजनाओं के बारे में बता सकता हूँ या वित्तीय सुरक्षा सिखा सकता हूँ।",
-      kn: "🙏 ನಮಸ್ಕಾರ! ನಾನು Artha AI, ನಿಮ್ಮ ಹಣಕಾಸು ಸಹಾಯಕ. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ? ನಾನು ನಿಮ್ಮ ಬ್ಯಾಲೆನ್ಸ್ ಪರಿಶೀಲಿಸಬಹುದು, ಬಿಲ್ ಪಾವತಿಸಬಹುದು, ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ವಿವರಿಸಬಹುದು ಅಥವಾ ಹಣಕಾಸು ಸುರಕ್ಷತೆಯನ್ನು ಕಲಿಸಬಹುದು."
+      en: "🙏 Hello! I am Artha Mitra, your financial assistant. How can I help you today? I can check your balance, pay bills, explain government schemes, or teach financial safety.",
+      hi: "🙏 नमस्ते! मैं Artha Mitra हूँ, आपका वित्तीय सहायक। आज मैं आपकी क्या मदद कर सकता हूँ? मैं आपका बैलेंस चेक कर सकता हूँ, बिलों का भुगतान कर सकता हूँ, सरकारी योजनाओं के बारे में बता सकता हूँ या वित्तीय सुरक्षा सिखा सकता हूँ।",
+      kn: "🙏 ನಮಸ್ಕಾರ! ನಾನು Artha Mitra, ನಿಮ್ಮ ಹಣಕಾಸು ಸಹಾಯಕ. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ? ನಾನು ನಿಮ್ಮ ಬ್ಯಾಲೆನ್ಸ್ ಪರಿಶೀಲಿಸಬಹುದು, ಬಿಲ್ ಪಾವತಿಸಬಹುದು, ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ವಿವರಿಸಬಹುದು ಅಥವಾ ಹಣಕಾಸು ಸುರಕ್ಷತೆಯನ್ನು ಕಲಿಸಬಹುದು."
     }
   },
   {
@@ -72,9 +72,9 @@ const LOCAL_QA = [
     id: 'app_whoareyou',
     match: [/who are you/i, /tum kaun ho/i, /kaun ho/i, /yaar neevu/i, /ಯಾರು ನೀವು/i, /तुम कौन हो/i],
     response: {
-      en: "🤖 I am Artha AI, your digital financial assistant created to help you with secure banking, schemes, and financial safety in rural India.",
-      hi: "🤖 मैं Artha AI हूँ, आपका डिजिटल वित्तीय सहायक। मैं ग्रामीण भारत में सुरक्षित बैंकिंग, सरकारी योजनाओं और वित्तीय साक्षरता में आपकी मदद करता हूँ।",
-      kn: "🤖 ನಾನು Artha AI, ಗ್ರಾಮೀಣ ಭಾರತದಲ್ಲಿ ಸುರಕ್ಷಿತ ಬ್ಯಾಂಕಿಂಗ್ ಮತ್ತು ಹಣಕಾಸು ಸಾಕ್ಷರತೆಗಾಗಿ ನಿಮಗೆ ಸಹಾಯ ಮಾಡುವ ಡಿಜಿಟಲ್ ಸಹಾಯಕ."
+      en: "🤖 I am Artha Mitra, your digital financial assistant created to help you with secure banking, schemes, and financial safety in rural India.",
+      hi: "🤖 मैं Artha Mitra हूँ, आपका डिजिटल वित्तीय सहायक। मैं ग्रामीण भारत में सुरक्षित बैंकिंग, सरकारी योजनाओं और वित्तीय साक्षरता में आपकी मदद करता हूँ।",
+      kn: "🤖 ನಾನು Artha Mitra, ಗ್ರಾಮೀಣ ಭಾರತದಲ್ಲಿ ಸುರಕ್ಷಿತ ಬ್ಯಾಂಕಿಂಗ್ ಮತ್ತು ಹಣಕಾಸು ಸಾಕ್ಷರತೆಗಾಗಿ ನಿಮಗೆ ಸಹಾಯ ಮಾಡುವ ಡಿಜಿಟಲ್ ಸಹಾಯಕ."
     }
   },
 

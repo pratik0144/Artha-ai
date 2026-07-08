@@ -1,12 +1,12 @@
-# Artha AI: Comprehensive Architecture Document
+# Artha Mitra: Comprehensive Architecture Document
 
-This document outlines the detailed system architecture, flow patterns, entity relationships, and optimizations of the **Artha AI** financial accessibility platform.
+This document outlines the detailed system architecture, flow patterns, entity relationships, and optimizations of the **Artha Mitra** financial accessibility platform.
 
 ---
 
 ## 1. System Overview
 
-Artha AI is built as a serverless, cloud-native application utilizing **Vercel** for hosting the frontend and serverless API handlers, **Supabase (PostgreSQL)** for transactional data persistence and rate-limiting security, and **Google AI Studio (Gemini 2.5 Flash)** for generative chat and Speech-to-Text (STT) capabilities.
+Artha Mitra is built as a serverless, cloud-native application utilizing **Vercel** for hosting the frontend and serverless API handlers, **Supabase (PostgreSQL)** for transactional data persistence and rate-limiting security, and **Google AI Studio (Gemini 2.5 Flash)** for generative chat and Speech-to-Text (STT) capabilities.
 
 ```mermaid
 graph TD
@@ -56,7 +56,7 @@ graph TD
 
 ## 2. Audio Optimization Pipeline
 
-To support low-bandwidth rural connections (2G/3G/4G), Artha AI performs client-side downsampling using native browser web APIs before uploading audio to the Speech-to-Text API.
+To support low-bandwidth rural connections (2G/3G/4G), Artha Mitra performs client-side downsampling using native browser web APIs before uploading audio to the Speech-to-Text API.
 
 ### Downsampling & Resampling Flow
 1. **Audio Capture:** The browser captures user audio using the `MediaRecorder` API (defaulting to 48kHz Stereo, encoded in WebM or WAV format, resulting in ~1MB per 5 seconds of audio).
@@ -69,7 +69,7 @@ To support low-bandwidth rural connections (2G/3G/4G), Artha AI performs client-
 
 ## 3. Intelligent Intent Classification & Routing
 
-Artha AI runs a hybrid classification layer that optimizes latency, API usage, and accuracy.
+Artha Mitra runs a hybrid classification layer that optimizes latency, API usage, and accuracy.
 
 ```
 Incoming Query

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Artha AI project will be documented in this file.
+All notable changes to the Artha Mitra project will be documented in this file.
 
 ## [2.2.0] - 2026-07-08 — Profile CRUD, Offline Statements & Voice Language Switcher
 

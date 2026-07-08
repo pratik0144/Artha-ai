@@ -1,6 +1,6 @@
-# Supabase Setup Guide — Artha AI
+# Supabase Setup Guide — Artha Mitra
 
-> Complete step-by-step guide with screenshots description for setting up Supabase, Google AI Studio, and deploying Artha AI.
+> Complete step-by-step guide with screenshots description for setting up Supabase, Google AI Studio, and deploying Artha Mitra.
 
 ---
 

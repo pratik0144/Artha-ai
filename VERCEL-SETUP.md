@@ -1,4 +1,4 @@
-# Vercel Deployment Guide — Artha AI
+# Vercel Deployment Guide — Artha Mitra
 
 ## Prerequisites
 

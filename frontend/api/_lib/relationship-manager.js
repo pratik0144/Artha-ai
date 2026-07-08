@@ -223,7 +223,134 @@ export async function buildFinancialSnapshot(supabase, accountId) {
   };
 }
 
-// ── 2. Generate Proactive Nudges ──────────────────────────────────
+// ── 2. Financial Health Score (0-100) ─────────────────────────────
+
+/**
+ * Compute a composite Financial Health Score from the snapshot.
+ * 
+ * Factors (total = 100 points):
+ *   - EMI burden:        25 pts (lower EMI-to-income ratio = better)
+ *   - Scheme utilization: 20 pts (more enrolled schemes = better)
+ *   - Savings behavior:   20 pts (FD holdings + idle savings avoidance)
+ *   - Spending discipline: 20 pts (month-over-month spending control)
+ *   - Fraud history:      15 pts (fewer fraud flags = better)
+ *
+ * @param {object} snapshot - Financial snapshot from buildFinancialSnapshot
+ * @returns {{ score: number, grade: string, driver: {en:string, hi:string, kn:string}, factors: object }}
+ */
+export function computeHealthScore(snapshot) {
+  if (!snapshot) return { score: 0, grade: 'N/A', driver: { en: '', hi: '', kn: '' }, factors: {} };
+
+  const factors = {};
+
+  // ── Factor 1: EMI Burden (25 pts) ──
+  // 0% EMI-to-income → 25 pts; 50%+ → 0 pts
+  const emiRatio = snapshot.loan_burden?.emi_to_income_ratio || 0;
+  factors.emi_burden = Math.max(0, Math.round(25 * (1 - Math.min(emiRatio, 50) / 50)));
+
+  // ── Factor 2: Scheme Utilization (20 pts) ──
+  // All eligible schemes claimed → 20 pts; none → based on enrolled count
+  const unclaimed = snapshot.unclaimed_schemes?.length || 0;
+  const totalEligible = unclaimed + 2; // assume at least 2 are enrolled (heuristic)
+  factors.scheme_utilization = unclaimed === 0 ? 20 : Math.max(0, Math.round(20 * (1 - unclaimed / Math.max(totalEligible, 1))));
+
+  // ── Factor 3: Savings Behavior (20 pts) ──
+  // Has FDs + no idle savings flag → 20 pts
+  const fdCount = snapshot.fixed_deposits?.count || 0;
+  const idleFlag = snapshot.idle_savings_flag;
+  if (fdCount >= 2 && !idleFlag) factors.savings = 20;
+  else if (fdCount >= 1 && !idleFlag) factors.savings = 15;
+  else if (fdCount >= 1) factors.savings = 10;
+  else if (!idleFlag) factors.savings = 8;
+  else factors.savings = 3;
+
+  // ── Factor 4: Spending Discipline (20 pts) ──
+  // Month-over-month spending decrease or stable → 20 pts; big increase → less
+  const thisMonth = snapshot.this_month_spending || 0;
+  const lastMonth = snapshot.last_month_spending || 0;
+  if (lastMonth === 0) {
+    factors.spending_discipline = thisMonth === 0 ? 15 : 12;
+  } else {
+    const spendChange = ((thisMonth - lastMonth) / lastMonth) * 100;
+    if (spendChange <= 0) factors.spending_discipline = 20;      // Decreased or same
+    else if (spendChange <= 10) factors.spending_discipline = 17; // Slight increase
+    else if (spendChange <= 25) factors.spending_discipline = 13; // Moderate increase
+    else if (spendChange <= 50) factors.spending_discipline = 8;  // Significant increase
+    else factors.spending_discipline = 3;                          // Alarming increase
+  }
+
+  // ── Factor 5: Fraud History (15 pts) ──
+  // 0 fraud flags → 15 pts; 1-2 → 10 pts; 3+ → 3 pts
+  const fraudCount = snapshot.recent_fraud_flags || 0;
+  if (fraudCount === 0) factors.fraud_safety = 15;
+  else if (fraudCount <= 2) factors.fraud_safety = 10;
+  else if (fraudCount <= 5) factors.fraud_safety = 5;
+  else factors.fraud_safety = 2;
+
+  // ── Composite Score ──
+  const score = factors.emi_burden + factors.scheme_utilization + factors.savings + factors.spending_discipline + factors.fraud_safety;
+
+  // ── Grade ──
+  let grade;
+  if (score >= 85) grade = 'A+';
+  else if (score >= 75) grade = 'A';
+  else if (score >= 65) grade = 'B+';
+  else if (score >= 55) grade = 'B';
+  else if (score >= 45) grade = 'C';
+  else if (score >= 35) grade = 'D';
+  else grade = 'F';
+
+  // ── Driver Text (what most impacts the score) ──
+  // Find the weakest factor and generate a one-line explanation
+  const maxPossible = { emi_burden: 25, scheme_utilization: 20, savings: 20, spending_discipline: 20, fraud_safety: 15 };
+  let worstFactor = '';
+  let worstGap = 0;
+  for (const [key, max] of Object.entries(maxPossible)) {
+    const gap = max - (factors[key] || 0);
+    if (gap > worstGap) { worstGap = gap; worstFactor = key; }
+  }
+
+  const driver = { en: '', hi: '', kn: '' };
+  switch (worstFactor) {
+    case 'emi_burden':
+      driver.en = `Your EMI takes ${emiRatio}% of estimated income — reducing loan burden will improve your score.`;
+      driver.hi = `आपकी EMI अनुमानित आय का ${emiRatio}% है — कर्ज कम करने से स्कोर बेहतर होगा।`;
+      driver.kn = `ನಿಮ್ಮ EMI ಅಂದಾಜು ಆದಾಯದ ${emiRatio}% — ಸಾಲ ಕಡಿಮೆ ಮಾಡಿದರೆ ಸ್ಕೋರ್ ಸುಧಾರಿಸುತ್ತದೆ.`;
+      break;
+    case 'scheme_utilization':
+      driver.en = `You have ${unclaimed} unclaimed eligible scheme${unclaimed > 1 ? 's' : ''} — enrolling will boost your score.`;
+      driver.hi = `आपकी ${unclaimed} पात्र योजना${unclaimed > 1 ? 'एं' : ''} अभी तक नहीं ली गई — नामांकन से स्कोर बढ़ेगा।`;
+      driver.kn = `ನಿಮ್ಮ ${unclaimed} ಅರ್ಹ ಯೋಜನೆ${unclaimed > 1 ? 'ಗಳು' : ''} ಇನ್ನೂ ಪಡೆದಿಲ್ಲ — ನೋಂದಣಿ ಮಾಡಿದರೆ ಸ್ಕೋರ್ ಹೆಚ್ಚಾಗುತ್ತದೆ.`;
+      break;
+    case 'savings':
+      driver.en = idleFlag
+        ? 'You have idle savings — starting a Fixed Deposit would improve your score.'
+        : 'Opening a Fixed Deposit would strengthen your savings score.';
+      driver.hi = idleFlag
+        ? 'आपके खाते में अप्रयुक्त बचत है — FD शुरू करने से स्कोर बेहतर होगा।'
+        : 'फिक्स्ड डिपॉजिट शुरू करने से आपका बचत स्कोर मजबूत होगा।';
+      driver.kn = idleFlag
+        ? 'ನಿಮ್ಮ ಖಾತೆಯಲ್ಲಿ ನಿಷ್ಕ್ರಿಯ ಉಳಿತಾಯವಿದೆ — FD ಪ್ರಾರಂಭಿಸಿದರೆ ಸ್ಕೋರ್ ಸುಧಾರಿಸುತ್ತದೆ.'
+        : 'ಫಿಕ್ಸೆಡ್ ಡೆಪಾಸಿಟ್ ಪ್ರಾರಂಭಿಸಿದರೆ ನಿಮ್ಮ ಉಳಿತಾಯ ಸ್ಕೋರ್ ಬಲಗೊಳ್ಳುತ್ತದೆ.';
+      break;
+    case 'spending_discipline': {
+      const spendPct = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : 0;
+      driver.en = `Your spending increased ${spendPct}% this month — controlling expenses will improve your score.`;
+      driver.hi = `इस महीने आपका खर्च ${spendPct}% बढ़ा है — खर्चे नियंत्रित करने से स्कोर बेहतर होगा।`;
+      driver.kn = `ಈ ತಿಂಗಳು ನಿಮ್ಮ ಖರ್ಚು ${spendPct}% ಹೆಚ್ಚಾಗಿದೆ — ವೆಚ್ಚ ನಿಯಂತ್ರಿಸಿದರೆ ಸ್ಕೋರ್ ಸುಧಾರಿಸುತ್ತದೆ.`;
+      break;
+    }
+    case 'fraud_safety':
+      driver.en = `${fraudCount} recent fraud alert${fraudCount > 1 ? 's' : ''} on your account — staying vigilant keeps your score high.`;
+      driver.hi = `आपके खाते पर ${fraudCount} हालिया धोखाधड़ी अलर्ट — सतर्क रहने से स्कोर अच्छा रहेगा।`;
+      driver.kn = `ನಿಮ್ಮ ಖಾತೆಯಲ್ಲಿ ${fraudCount} ಇತ್ತೀಚಿನ ವಂಚನೆ ಎಚ್ಚರಿಕೆ — ಜಾಗರೂಕರಾಗಿದ್ದರೆ ಸ್ಕೋರ್ ಉತ್ತಮವಾಗಿರುತ್ತದೆ.`;
+      break;
+  }
+
+  return { score, grade, driver, factors };
+}
+
+// ── 3. Generate Proactive Nudges ──────────────────────────────────
 
 /**
  * Generate 0-2 short proactive nudges based on simple, data-driven thresholds.

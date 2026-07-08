@@ -11,7 +11,8 @@ import { classifyIntent } from './_lib/intent-classifier.js';
 import { dispatch } from './_lib/agents/dispatcher.js';
 import { getActiveKeyIndex, getKeyUsageStats } from './_lib/gemini-pool.js';
 import { executeAgenticTask } from './_lib/agent-registry.js';
-import { buildFinancialSnapshot, formatSnapshotForPrompt } from './_lib/relationship-manager.js';
+import { buildFinancialSnapshot, formatSnapshotForPrompt, computeHealthScore } from './_lib/relationship-manager.js';
+import { detectTransactionAnomaly } from './_lib/fraud-anomaly.js';
 
 export default async function handler(req, res) {
   // CORS
@@ -117,6 +118,30 @@ export default async function handler(req, res) {
         context.financial_context_text = formatSnapshotForPrompt(snapshot);
       }
 
+      // 7c. Background behavioral anomaly detection (non-blocking)
+      let anomalyResult = { is_anomaly: false, flags: [] };
+      try {
+        anomalyResult = await detectTransactionAnomaly(supabase, context.account_id);
+        if (anomalyResult.is_anomaly) {
+          // Log each anomaly flag to fraud_logs with transparent explanation
+          for (const flag of anomalyResult.flags) {
+            if (flag.severity === 'low') continue; // Don't log low-severity supplementary flags
+            try {
+              await supabase.from('fraud_logs').insert({
+                account_id: context.account_id,
+                message: `[ANOMALY:${flag.type}] ${flag.detail}`,
+                matched_patterns: [flag.type, flag.detail],
+                severity: flag.severity || 'medium',
+              });
+            } catch (logErr) {
+              console.warn('[chat-anomaly-log] Failed to log anomaly:', logErr.message);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[chat-anomaly] Detection error (non-fatal):', e.message);
+      }
+
       // 8. Handle fraud / dispatch
       if (fraudCheck.is_fraud) {
         // Log the auto-blocked scam attempt
@@ -140,6 +165,15 @@ export default async function handler(req, res) {
       } else {
         const routeResult = { intent, language: lang, fraud_check: fraudCheck, route_to: intent };
         agentResponse = await dispatch(supabase, routeResult, message.trim(), history, context);
+
+        // If anomaly was detected, append a subtle warning to the normal response
+        if (anomalyResult.is_anomaly && agentResponse.response) {
+          const anomalyWarning = anomalyResult.explanation[responseLang] || anomalyResult.explanation.en;
+          if (anomalyWarning) {
+            agentResponse.response += '\n\n' + anomalyWarning;
+            agentResponse.anomaly_detected = true;
+          }
+        }
       }
     }
 
@@ -150,7 +184,7 @@ export default async function handler(req, res) {
       { role: 'assistant', content: agentResponse.response },
     ].slice(-20);
 
-    await supabase.from('sessions').update({ conversation_history: newHistory }).eq('account_id', sessionId);
+    await supabase.from('sessions').update({ conversation_history: newHistory, profile }).eq('account_id', sessionId);
 
     // 9. Increment credits
     await incrementUsage(supabase, sessionId);

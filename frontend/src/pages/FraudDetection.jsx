@@ -62,7 +62,7 @@ export const FraudDetection = () => {
             ? 'आपके खाते पर कोई हालिया संदिग्ध गतिविधि नहीं मिली है। आपका फंड सुरक्षित है।'
             : appLang === 'kn'
             ? 'ನಿಮ್ಮ ಖಾತೆಯಲ್ಲಿ ಯಾವುದೇ ಇತ್ತೀಚಿನ ಶಂಕಾಸ್ಪದ ಚಟುವಟಿಕೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ. ನಿಮ್ಮ ಹಣ ಸುರಕ್ಷಿತವಾಗಿದೆ.'
-            : 'No suspicious activities detected recently. Your funds are protected by Artha Guard.',
+            : 'No suspicious activities detected recently. Your funds are protected by Artha Mitra Guard.',
           style: 'border border-outline bg-surface-container text-on-surface',
           badgeStyle: 'bg-primary text-on-primary',
           icon: <ShieldCheck size={32} className="text-primary" />
@@ -126,7 +126,7 @@ export const FraudDetection = () => {
       <header className="mb-8">
         <h1 className="h2 text-primary flex items-center gap-3">
           <ShieldAlert size={36} className="text-primary animate-pulse" />
-          {appLang === 'hi' ? 'धोखाधड़ी और सुरक्षा कवच' : appLang === 'kn' ? 'ವಂಚನೆ ಮತ್ತು ಭದ್ರತಾ ಕವಚ' : 'Artha Guard Security'}
+          {appLang === 'hi' ? 'धोखाधड़ी और सुरक्षा कवच' : appLang === 'kn' ? 'ವಂಚನೆ ಮತ್ತು ಭದ್ರತಾ ಕವಚ' : 'Artha Mitra Guard'}
         </h1>
         <p className="body-sm text-secondary mt-2">
           {appLang === 'hi'
@@ -183,7 +183,7 @@ export const FraudDetection = () => {
                   ? 'आपका खाता वर्तमान में पूरी तरह सुरक्षित है। जब भी आप बातचीत करेंगे, हमारा सुरक्षा कवच आपकी निगरानी करता रहेगा।'
                   : appLang === 'kn'
                   ? 'ನಿಮ್ಮ ಖಾತೆಯು ಪ್ರಸ್ತುತ ಸುರಕ್ಷಿತವಾಗಿದೆ. ಚಾಟ್ ಮಾಡುವಾಗ ಯಾವುದೇ ವಂಚನೆ ಕಂಡುಬಂದರೆ ನಾವಿಲ್ಲಿ ಎಚ್ಚರಿಕೆ ನೀಡುತ್ತೇವೆ.'
-                  : 'Your account is in good standing. Artha Guard monitors your active chat sessions in real time to filter out OTP phishing and deposit scams.'}
+                  : 'Your account is in good standing. Artha Mitra Guard monitors your active chat sessions in real time to filter out OTP phishing and deposit scams.'}
               </p>
             </div>
           ) : (
@@ -261,7 +261,7 @@ export const FraudDetection = () => {
                     ? 'हमारी सुरक्षा टीम जांच कर रही है। रमेश जी, सतर्क रहें — किसी को अपना पिन न बताएं।'
                     : appLang === 'kn'
                     ? 'ನಮ್ಮ ಭದ್ರತಾ ತಂಡ ಪರಿಶೀಲಿಸುತ್ತಿದೆ. ರಮೇಶ್ ಅವರೇ, ಜಾಗರೂಕರಾಗಿರಿ — ಪಿನ್ ಯಾರೊಂದಿಗೂ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ.'
-                    : 'Our cybersecurity desk is investigating. We appreciate your vigilance. Artha AI will never call to ask for your passwords.'}
+                    : 'Our cybersecurity desk is investigating. We appreciate your vigilance. Artha Mitra will never call to ask for your passwords.'}
                 </p>
                 <button
                   onClick={() => setReportState(s => ({ ...s, submitted: false }))}

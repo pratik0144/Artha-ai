@@ -41,9 +41,9 @@ const AGENTIC_REGISTRY = [
       /ನಮಸ್ಕಾರ/i, /ಶುಭೋದಯ/i, /ಶುಭ ಸಂಜೆ/i, /ಹಲೋ/i
     ],
     execute: async (supabase, accountId, lang) => {
-      if (lang === 'hi') return '🙏 नमस्ते! मैं Artha AI हूँ, आपका वित्तीय सहायक। आज मैं आपकी क्या मदद कर सकता हूँ? मैं आपका बैलेंस चेक कर सकता हूँ, बिलों का भुगतान कर सकता हूँ, सरकारी योजनाओं के बारे में बता सकता हूँ या वित्तीय सुरक्षा सिखा सकता हूँ।';
-      if (lang === 'kn') return '🙏 ನಮಸ್ಕಾರ! ನಾನು Artha AI, ನಿಮ್ಮ ಹಣಕಾಸು ಸಹಾಯಕ. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ? ನಾನು ನಿಮ್ಮ ಬ್ಯಾಲೆನ್ಸ್ ಪರಿಶೀಲಿಸಬಹುದು, ಬಿಲ್ ಪಾವತಿಸಬಹುದು, ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ವಿವರಿಸಬಹುದು ಅಥವಾ ಹಣಕಾಸು ಸುರಕ್ಷತೆಯನ್ನು ಕಲಿಸಬಹುದು.';
-      return '🙏 Hello! I am Artha AI, your financial assistant. How can I help you today? I can check your balance, pay bills, explain government schemes, or teach financial safety.';
+      if (lang === 'hi') return '🙏 नमस्ते! मैं Artha Mitra हूँ, आपका वित्तीय सहायक। आज मैं आपकी क्या मदद कर सकता हूँ? मैं आपका बैलेंस चेक कर सकता हूँ, बिलों का भुगतान कर सकता हूँ, सरकारी योजनाओं के बारे में बता सकता हूँ या वित्तीय सुरक्षा सिखा सकता हूँ।';
+      if (lang === 'kn') return '🙏 ನಮಸ್ಕಾರ! ನಾನು Artha Mitra, ನಿಮ್ಮ ಹಣಕಾಸು ಸಹಾಯಕ. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ? ನಾನು ನಿಮ್ಮ ಬ್ಯಾಲೆನ್ಸ್ ಪರಿಶೀಲಿಸಬಹುದು, ಬಿಲ್ ಪಾವತಿಸಬಹುದು, ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ವಿವರಿಸಬಹುದು ಅಥವಾ ಹಣಕಾಸು ಸುರಕ್ಷತೆಯನ್ನು ಕಲಿಸಬಹುದು.';
+      return '🙏 Hello! I am Artha Mitra, your financial assistant. How can I help you today? I can check your balance, pay bills, explain government schemes, or teach financial safety.';
     }
   },
   {
@@ -1007,6 +1007,18 @@ function correctSpelling(userMessage) {
   return correctedWords.join(' ');
 }
 
+const TRANSACTION_AGENT_IDS = [
+  'agent_pay_electricity',
+  'agent_pay_mobile',
+  'agent_pay_ration',
+  'agent_pay_insurance',
+  'agent_pay_kcc_loan',
+  'agent_pay_tractor_loan',
+  'agent_pay_all_loans',
+  'agent_create_fd',
+  'agent_transfer_funds'
+];
+
 /**
  * Searches the agent registry and executes the corresponding database task or Q&A look-up.
  * Now tries matching BOTH the original message AND a translated English version,
@@ -1016,6 +1028,43 @@ export async function executeAgenticTask(supabase, accountId, userMessage, lang,
   const cleanedMessage = correctSpelling(userMessage);
   const textLower = cleanedMessage.toLowerCase().trim();
   const activeLang = ['en', 'hi', 'kn'].includes(lang) ? lang : 'hi';
+
+  const hasPending = context && context.pending_transaction;
+  const isFourDigit = /^\s*\d{4}\s*$/.test(userMessage);
+
+  // 1. Check for password submission when a transaction is pending
+  if (isFourDigit && hasPending) {
+    const enteredPin = userMessage.trim();
+    if (enteredPin === '1234') {
+      const pending = context.pending_transaction;
+      delete context.pending_transaction; // Clear pending state
+
+      const targetAgent = AGENTIC_REGISTRY.find(a => a.id === pending.agentId);
+      if (targetAgent && targetAgent.execute) {
+        try {
+          const resultText = await targetAgent.execute(supabase, accountId, activeLang, context, pending.originalMessage);
+          return resultText;
+        } catch (err) {
+          console.error(`[agentic-registry] Pending execution failed:`, err.message);
+          if (activeLang === 'hi') return 'लेनदेन पूरा करने में असमर्थ। कृपया पुनः प्रयास करें।';
+          if (activeLang === 'kn') return 'ವಹಿವಾಟು ಪೂರ್ಣಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.';
+          return 'Could not complete the transaction. Please try again.';
+        }
+      }
+    } else {
+      delete context.pending_transaction; // Clear pending state on incorrect password
+      if (activeLang === 'hi') return 'गलत लेनदेन पासवर्ड। लेनदेन रद्द कर दिया गया है।';
+      if (activeLang === 'kn') return 'ತಪ್ಪು ವಹಿವಾಟು ಪಾಸ್‌ವರ್ಡ್. ವಹಿವಾಟು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ.';
+      return 'Incorrect transaction password. Transaction cancelled.';
+    }
+  }
+
+  // 2. Check if user typed '1234' with no pending transaction
+  if (userMessage.trim() === '1234' && !hasPending) {
+    if (activeLang === 'hi') return 'पूरा करने के लिए कोई लंबित लेनदेन नहीं है।';
+    if (activeLang === 'kn') return 'ಪೂರ್ಣಗೊಳಿಸಲು ಯಾವುದೇ ಬಾಕಿ ವಹಿವಾಟು ಇಲ್ಲ.';
+    return 'There is no pending transaction to complete.';
+  }
 
   // Generate a translated English version of the message
   const translatedText = translateToEnglish(userMessage);
@@ -1027,6 +1076,24 @@ export async function executeAgenticTask(supabase, accountId, userMessage, lang,
 
     if (matched) {
       if (item.execute) {
+        // Intercept transaction agents to prompt for the password
+        if (TRANSACTION_AGENT_IDS.includes(item.id)) {
+          if (!context) context = {};
+          context.pending_transaction = {
+            agentId: item.id,
+            originalMessage: cleanedMessage,
+            timestamp: Date.now()
+          };
+
+          if (activeLang === 'hi') {
+            return 'कृपया लेनदेन पूरा करने के लिए अपना 4-अंकीय लेनदेन पासवर्ड दर्ज करें।';
+          }
+          if (activeLang === 'kn') {
+            return 'ಈ ವಹಿವಾಟನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು ದಯವಿಟ್ಟು ನಿಮ್ಮ 4-ಅಂಕಿಯ ವಹಿವಾಟು ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ.';
+          }
+          return 'Please enter your 4-digit transaction password to complete this transaction.';
+        }
+
         try {
           const resultText = await item.execute(supabase, accountId, activeLang, context, cleanedMessage);
           return resultText;

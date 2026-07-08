@@ -23,7 +23,7 @@ export async function runFraudAgent(supabase, context, userMessage, history) {
         account_id: context.account_id || 'unknown',
         message: userMessage.slice(0, 500),
         matched_patterns: fraudResult.matched,
-        severity: fraudResult.risk_score || (fraudResult.matched.length > 1 ? 'HIGH' : 'MEDIUM'),
+        severity: fraudResult.risk_score || (fraudResult.matched.length > 1 ? 'high' : 'medium'),
       });
     } catch (e) {
       console.warn('[fraud-agent] Failed to log fraud:', e.message);

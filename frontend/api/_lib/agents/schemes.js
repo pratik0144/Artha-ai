@@ -118,7 +118,7 @@ export async function runSchemesAgent(supabase, context, userMessage, history) {
 
   // Fetch enrolled schemes
   const { data: acct } = await supabase
-    .from('accounts').select('linked_schemes').eq('account_id', accountId).single();
+    .from('accounts').select('linked_schemes, occupation, bpl_card, land_acres, age, gender').eq('account_id', accountId).single();
   const enrolledSchemes = acct?.linked_schemes || [];
 
   let enrollmentBlock = '';
@@ -131,6 +131,78 @@ export async function runSchemesAgent(supabase, context, userMessage, history) {
         `- ${s.name} (${s.ministry}): ${s.benefits}. Documents: ${(s.documents_required || []).join(', ')}`
       ).join('\n') + '\n'
     : '';
+
+  // ── Explainable Eligibility Reasoning (B3) ──────────────────
+  // Query the government_schemes table for structured eligibility_criteria
+  const { data: govSchemes } = await supabase
+    .from('government_schemes').select('name, eligibility_criteria, benefit_amount, frequency');
+
+  let eligibilityReasoning = '';
+  if (govSchemes && acct) {
+    const reasoningLines = [];
+    for (const scheme of govSchemes) {
+      const criteria = scheme.eligibility_criteria || {};
+      const checks = [];
+      let eligible = true;
+
+      // Occupation check
+      if (criteria.occupation && !criteria.occupation.includes('any')) {
+        const match = criteria.occupation.includes(acct.occupation);
+        checks.push(match
+          ? `  ✅ Occupation: ${acct.occupation} (required: ${criteria.occupation.join('/')})`
+          : `  ❌ Occupation: ${acct.occupation || 'unknown'} (required: ${criteria.occupation.join('/')})`);
+        if (!match) eligible = false;
+      } else {
+        checks.push(`  ✅ Occupation: Any (no restriction)`);
+      }
+
+      // BPL check
+      if (criteria.bpl_required) {
+        const match = !!acct.bpl_card;
+        checks.push(match ? `  ✅ BPL Card: Yes` : `  ❌ BPL Card: No (required)`);
+        if (!match) eligible = false;
+      }
+
+      // Land check
+      if (criteria.land_required) {
+        const match = acct.land_acres > 0;
+        checks.push(match ? `  ✅ Land ownership: ${acct.land_acres} acres` : `  ❌ Land ownership: None (required)`);
+        if (!match) eligible = false;
+      }
+
+      // Age check
+      if (criteria.age_range) {
+        const [minAge, maxAge] = criteria.age_range;
+        const userAge = acct.age || 0;
+        const match = userAge >= minAge && userAge <= maxAge;
+        checks.push(match
+          ? `  ✅ Age: ${userAge} years (range: ${minAge}-${maxAge})`
+          : `  ❌ Age: ${userAge} years (required: ${minAge}-${maxAge})`);
+        if (!match) eligible = false;
+      }
+
+      // Gender check
+      if (criteria.gender && criteria.gender !== 'any') {
+        const match = acct.gender === criteria.gender;
+        checks.push(match
+          ? `  ✅ Gender: ${acct.gender}`
+          : `  ❌ Gender: ${acct.gender || 'unknown'} (required: ${criteria.gender})`);
+        if (!match) eligible = false;
+      }
+
+      // Max income check
+      if (criteria.max_income) {
+        checks.push(`  ℹ️ Max income limit: ₹${formatINR(criteria.max_income)}/year`);
+      }
+
+      const status = enrolledSchemes.some(e => scheme.name.toLowerCase().includes(e.toLowerCase()) || e.toLowerCase().includes(scheme.name.toLowerCase()))
+        ? '🟢 ENROLLED'
+        : eligible ? '🟡 ELIGIBLE (not enrolled)' : '🔴 NOT ELIGIBLE';
+
+      reasoningLines.push(`${scheme.name} [${status}] — Benefit: ₹${scheme.benefit_amount || 'N/A'} ${scheme.frequency || ''}\n${checks.join('\n')}`);
+    }
+    eligibilityReasoning = `\n[ELIGIBILITY REASONING — per-criterion breakdown for user]\n${reasoningLines.join('\n\n')}\n`;
+  }
 
   const lang = context.language || 'hi';
   
@@ -155,9 +227,11 @@ ${searchBlock}
 Top recommendations:
 ${recommendations}
 ${enrollmentBlock}
+${eligibilityReasoning}
 
 [TASK]
 Guide the user regarding government schemes. Keep responses simple and reassuring for rural users.
+IMPORTANT: When explaining eligibility, use the per-criterion breakdown above to show WHY the user qualifies or doesn't qualify. Use ✅/❌ symbols for clarity. For schemes the user is NOT eligible for, explain exactly which criteria failed and what would need to change.
 
 [FEW-SHOT EXAMPLES]
 ---
